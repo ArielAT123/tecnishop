@@ -13,7 +13,7 @@ import java.util.Scanner;
  */
 public class pruebaSQL {
     
-    private static Connection con;
+    //private static Connection con;
     private static final String URL = "jdbc:mysql://localhost:3306/tecnishop";
     private static final String USER = "root";
     private static final String PASSWORD = "";
@@ -63,38 +63,40 @@ public class pruebaSQL {
             System.out.println("Error al obtener cliente: " + e.getMessage());
         }
     }
-
-    public static int preguntar(Scanner e) {
-        System.out.println("Agregar cliente");
-        System.out.println("Desea Continuar? si(0)/no(1)");
-        System.out.println("Ingrese su respuesta: ");
-        return e.nextInt();
+    public static void insertProducto(String nombre, String descripcion, double costoCompra, double porcentajeGanancia, double impuesto, int cantidad) {
+    String query = "INSERT INTO producto (nombre, descripcion, costo_compra, porcentaje_ganancia, impuesto, cantidad) VALUES (?, ?, ?, ?, ?, ?)";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setString(1, nombre);
+        stmt.setString(2, descripcion);
+        stmt.setDouble(3, costoCompra);
+        stmt.setDouble(4, porcentajeGanancia);
+        stmt.setDouble(5, impuesto);
+        stmt.setInt(6, cantidad);
+        stmt.executeUpdate();
+        System.out.println("Producto guardado correctamente.");
+    } catch (Exception e) {
+        System.out.println("Error al guardar producto: " + e.getMessage());
     }
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        
-        do {
-            // Pedir los datos del cliente
-            System.out.println("Ingrese Nombre:");
-            String nombre = scanner.nextLine();
-            System.out.println("Ingrese Apellido:");
-            String apellido = scanner.nextLine();
-            System.out.println("Ingrese Teléfono:");
-            String telefono = scanner.nextLine();
-            System.out.println("Ingrese Correo:");
-            String correo = scanner.nextLine();
-            System.out.println("Ingrese CI:");
-            String ci = scanner.nextLine();
-            
-            // Insertar cliente
-            insertCliente(nombre, apellido, telefono, correo, ci);
-
-            // Preguntar si desea continuar
-        } while (preguntar(scanner) != 1);
-
-        getLastCliente();
-
-        scanner.close();
+}
+    public static void getLastProducto() {
+    String query = "SELECT * FROM producto ORDER BY id DESC LIMIT 1";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
+        if (rs.next()) {
+            System.out.println("Último producto guardado:");
+            System.out.println("Nombre: " + rs.getString("nombre"));
+            System.out.println("Descripción: " + rs.getString("descripcion"));
+            System.out.println("Costo de Compra: " + rs.getDouble("costo_compra"));
+            System.out.println("Porcentaje de Ganancia: " + rs.getDouble("porcentaje_ganancia"));
+            System.out.println("Impuesto: " + rs.getDouble("impuesto"));
+            System.out.println("Cantidad: " + rs.getInt("cantidad"));
+        } else {
+            System.out.println("No hay productos en la base de datos.");
+        }
+    } catch (Exception e) {
+        System.out.println("Error al obtener producto: " + e.getMessage());
     }
+}
 }
