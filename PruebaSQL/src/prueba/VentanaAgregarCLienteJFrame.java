@@ -6,10 +6,15 @@ package prueba;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -21,12 +26,38 @@ import javax.swing.border.LineBorder;
  */
 public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     private String nombre, apellido, correo, telefono, ci;
-    
+    private MenuFrame menuFrame; 
+    private javax.swing.JButton btnRegresarMenu;
     /**
      * Creates new form VentanaAgregarCLienteJFrame
      */
-    public VentanaAgregarCLienteJFrame() {
+    public VentanaAgregarCLienteJFrame(MenuFrame menuFrame) {
+        this.menuFrame=menuFrame;
         initComponents();
+    }
+    
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                if (!isOpaque()) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(getBackground());
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                    g2.dispose();
+                }
+                super.paintComponent(g);
+            }
+        };
+        button.setFont(new Font("Arial", Font.BOLD, 16));
+        button.setBackground(new Color(200, 0, 0));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setContentAreaFilled(false);
+        button.setOpaque(false);
+        return button;
     }
 /*
     @SuppressWarnings("checked")
@@ -175,7 +206,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_nombreClienteInputMethodTextChanged
 */private void initComponents() {
         jPanel1 = new javax.swing.JPanel();
-        InsertButton = new javax.swing.JButton("Insertar");
+        InsertButton = createStyledButton("Insertar");
         nombreCliente = new javax.swing.JTextField();
         apellidoCliente = new javax.swing.JTextField();
         correoCliente = new javax.swing.JTextField();
@@ -186,8 +217,10 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel("Teléfono:");
         jLabel5 = new javax.swing.JLabel("CI:");
         jTextField1 = new javax.swing.JTextField();
+        btnRegresarMenu = createStyledButton("back");
+        
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Registro Cliente");
 
         // Estilo del Panel
@@ -206,7 +239,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         agregarEventoFocus(correoCliente, "Ingrese correo");
         agregarEventoFocus(telefonoCliente, "Ingrese teléfono");
         agregarEventoFocus(jTextField1, "Ingrese CI");
-
+        btnRegresarMenu = createStyledButton("Regresar al Menú");
 
         // Configuración de los JLabel
         configurarEtiqueta(jLabel1);
@@ -215,11 +248,8 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         configurarEtiqueta(jLabel4);
         configurarEtiqueta(jLabel5);
 
-        // Botón Insertar Estilizado
-        InsertButton.setFont(new Font("Arial", Font.BOLD, 14));
-        InsertButton.setBackground(new Color(70, 130, 180));  // Azul oscuro
-        InsertButton.setForeground(Color.WHITE);
-        InsertButton.setBorder(new LineBorder(new Color(25, 25, 112), 2, true));
+        
+        
 
         // Evento para capturar los datos al presionar el botón
         InsertButton.addActionListener(new ActionListener() {
@@ -228,6 +258,15 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
                 guardarDatos();
                 prueba.insertCliente(nombre, apellido,  telefono,  correo,  ci);
                 resetearCampos();
+            }
+        });
+        
+        // Acción para el botón "Regresar al Menú"
+        btnRegresarMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setVisible(false); // Oculta la ventana actual
+                menuFrame.setVisible(true); // Muestra el menú principal
             }
         });
 
@@ -256,6 +295,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
                         .addComponent(jLabel5)
                         .addComponent(jTextField1, 150, 150, 150)))
                 .addComponent(InsertButton, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnRegresarMenu, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE)
         );
 
         layout.setVerticalGroup(
@@ -274,6 +314,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
                     .addComponent(jTextField1, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
                 .addGap(20)
                 .addComponent(InsertButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnRegresarMenu, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)
         );
 
         getContentPane().add(jPanel1);
@@ -350,14 +391,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new VentanaAgregarCLienteJFrame().setVisible(true);
-            }
-        });
-    }
+    
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
