@@ -5,7 +5,6 @@
 package prueba;
 
 import java.sql.*;
-import java.util.Scanner;
 
 /**
  *
@@ -99,4 +98,24 @@ public class pruebaSQL {
         System.out.println("Error al obtener producto: " + e.getMessage());
     }
 }
+    
+    public static int getIdClienteXCedula(String ci) {
+    int clienteId=0;
+    String query = "SELECT id FROM cliente WHERE CI = ? LIMIT 1";
+
+    try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+         PreparedStatement ps = connection.prepareStatement(query)) {
+
+        ps.setString(1, ci);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            clienteId = rs.getInt("id");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return clienteId;
+}
+
 }

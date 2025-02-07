@@ -35,30 +35,6 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         this.menuFrame=menuFrame;
         initComponents();
     }
-    
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                if (!isOpaque()) {
-                    Graphics2D g2 = (Graphics2D) g.create();
-                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2.setColor(getBackground());
-                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-                    g2.dispose();
-                }
-                super.paintComponent(g);
-            }
-        };
-        button.setFont(new Font("Arial", Font.BOLD, 16));
-        button.setBackground(new Color(200, 0, 0));
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        button.setContentAreaFilled(false);
-        button.setOpaque(false);
-        return button;
-    }
 /*
     @SuppressWarnings("checked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -206,7 +182,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_nombreClienteInputMethodTextChanged
 */private void initComponents() {
         jPanel1 = new javax.swing.JPanel();
-        InsertButton = createStyledButton("Insertar");
+        InsertButton = new RoundRedButton("Insertar");
         nombreCliente = new javax.swing.JTextField();
         apellidoCliente = new javax.swing.JTextField();
         correoCliente = new javax.swing.JTextField();
@@ -217,7 +193,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel("Teléfono:");
         jLabel5 = new javax.swing.JLabel("CI:");
         jTextField1 = new javax.swing.JTextField();
-        btnRegresarMenu = createStyledButton("back");
+        btnRegresarMenu = new RoundRedButton("back");
         
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -239,7 +215,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         agregarEventoFocus(correoCliente, "Ingrese correo");
         agregarEventoFocus(telefonoCliente, "Ingrese teléfono");
         agregarEventoFocus(jTextField1, "Ingrese CI");
-        btnRegresarMenu = createStyledButton("Regresar al Menú");
+        btnRegresarMenu = new RoundRedButton("Regresar al Menú");
 
         // Configuración de los JLabel
         configurarEtiqueta(jLabel1);
