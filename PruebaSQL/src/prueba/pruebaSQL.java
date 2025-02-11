@@ -117,5 +117,37 @@ public class pruebaSQL {
     }
     return clienteId;
 }
-
+    public boolean idClienteExiste(String ci){
+        return getIdClienteXCedula(ci)!=0;
+    }
+    
+    
+    public static void insertOrden(int id_equipo, Date fecha) {
+    String query = "INSERT INTO orden (equipo_id, fecha) VALUES (?, ?)";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setInt(1, id_equipo);
+        stmt.setDate(2, fecha);
+        stmt.executeUpdate();
+        System.out.println("Orden guardada correctamente.");
+    } catch (Exception e) {
+        System.out.println("Error al guardar orden: " + e.getMessage());
+    }
+}
+    public static void insertEquipo(String articulo, int id_Cliente, String marca,  String modelo, String numero_serie){
+    String query = "INSERT INTO equipo (nombre, cliente_id, marca, modelo, numero_serie) VALUES (?, ?, ?, ?)";
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setString(1, articulo);
+        stmt.setInt(2, id_Cliente);
+        stmt.setString(3, modelo);
+        stmt.setString(4, numero_serie);
+        stmt.executeUpdate();
+        System.out.println("equipo guardado correctamente.");
+    } catch (Exception e) {
+        System.out.println("Error al guardar equipo: " + e.getMessage());
+    }
+    }
+    
+    public static void insertObservaciones(){}
 }
