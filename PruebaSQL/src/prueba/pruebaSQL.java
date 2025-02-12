@@ -134,20 +134,36 @@ public class pruebaSQL {
         System.out.println("Error al guardar orden: " + e.getMessage());
     }
 }
-    public static void insertEquipo(String articulo, int id_Cliente, String marca,  String modelo, String numero_serie){
-    String query = "INSERT INTO equipo (nombre, cliente_id, marca, modelo, numero_serie) VALUES (?, ?, ?, ?)";
+    public static int insertEquipo(String articulo, int id_Cliente, String marca, String modelo, String numero_serie) {
+    String query = "INSERT INTO equipo (nombre, cliente_id, marca, modelo, numero_serie) VALUES (?, ?, ?, ?, ?)";
+    int generatedId = -1; // Valor por defecto en caso de error
+
     try (Connection conn = connect();
-         PreparedStatement stmt = conn.prepareStatement(query)) {
+         PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
         stmt.setString(1, articulo);
         stmt.setInt(2, id_Cliente);
-        stmt.setString(3, modelo);
-        stmt.setString(4, numero_serie);
+        stmt.setString(3, marca);
+        stmt.setString(4, modelo);
+        stmt.setString(5, numero_serie);
         stmt.executeUpdate();
-        System.out.println("equipo guardado correctamente.");
+
+        // Obtener el ID generado
+        try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                generatedId = generatedKeys.getInt(1);
+                System.out.println("Equipo guardado correctamente. ID: " + generatedId);
+            } else {
+                System.out.println("Error al obtener el ID generado.");
+            }
+        }
     } catch (Exception e) {
         System.out.println("Error al guardar equipo: " + e.getMessage());
     }
+
+    return generatedId;
     }
     
-    public static void insertObservaciones(){}
+    public static void insertObservaciones(){}        
 }
+

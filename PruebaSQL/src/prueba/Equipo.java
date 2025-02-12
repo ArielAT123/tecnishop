@@ -12,6 +12,7 @@ public class Equipo {
     private pruebaSQL prueba; 
     private String articulo,marca, modelo,numero_serie;
     private int id_Cliente;
+    private int id_equipo;
 
     public Equipo(String articulo, String marca, String modelo, String numero_serie, int id_cliente) {
         this.articulo = articulo;
@@ -19,7 +20,7 @@ public class Equipo {
         this.modelo = modelo;
         this.numero_serie = numero_serie;
         this.id_Cliente = id_cliente;
-        prueba.insertEquipo(this.articulo, this.id_Cliente, this.marca,  this.modelo, this.numero_serie);
+        id_equipo= prueba.insertEquipo(this.articulo, this.id_Cliente, this.marca,  this.modelo, this.numero_serie);
     }
 
     public String getArticulo() {
@@ -60,6 +61,10 @@ public class Equipo {
 
     public void setId_cliente(int id_cliente) {
         this.id_Cliente = id_cliente;
+    }
+
+    public int getId_equipo() {
+        return id_equipo;
     }
     
 }

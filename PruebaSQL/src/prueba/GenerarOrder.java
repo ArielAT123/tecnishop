@@ -2,9 +2,8 @@ package prueba;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Date;
+import java.sql.Date;
+import javax.swing.text.AbstractDocument;
 
 public class GenerarOrder extends JFrame {
     private JTextField articuloField, marcaField, modeloField, serieField, cedula_Cliente;
@@ -12,28 +11,28 @@ public class GenerarOrder extends JFrame {
     private JCheckBox cargadorCheckBox, bateriaCheckBox, cablePoderCheckBox, cableDatosCheckBox;
     private RoundRedButton ordenButton, menuButton;
     private MenuFrame menuFrame;
-    //datos para la orden
+    private VentanaAgregarCLienteJFrame aggCliente = new VentanaAgregarCLienteJFrame(this);
+    // Datos para la orden
     private Equipo equipo;
-    private Date fecha; 
-    
-    private pruebaSQL prueba;
-    
+    private Date fecha = Date.valueOf(java.time.LocalDate.now());
+    private pruebaSQL prueba = new pruebaSQL();
 
     public GenerarOrder(MenuFrame menuFrame) {
         this.menuFrame = menuFrame;
         setTitle("Formulario de Equipo");
-        setSize(800, 600); // Aumentar el tamaño de la ventana
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout(10, 10)); // Añadir márgenes entre componentes
+        setLayout(new BorderLayout(10, 10));
+        
 
         // Panel para los campos de entrada
-        JPanel inputPanel = new JPanel(new GridLayout(6, 2, 10, 10)); // Añadir espacios entre celdas
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Añadir márgenes
-        
+        JPanel inputPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         inputPanel.add(new JLabel("CEDULA:"));
         cedula_Cliente = new JTextField();
         inputPanel.add(cedula_Cliente);
-        
+
         inputPanel.add(new JLabel("ARTICULO:"));
         articuloField = new JTextField();
         inputPanel.add(articuloField);
@@ -50,21 +49,19 @@ public class GenerarOrder extends JFrame {
         serieField = new JTextField();
         inputPanel.add(serieField);
 
-        
-
         add(inputPanel, BorderLayout.NORTH);
 
         // Panel para los problemas reportados
         JPanel problemasPanel = new JPanel(new BorderLayout());
-        problemasPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Añadir márgenes
+        problemasPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         problemasPanel.add(new JLabel("Problemas reportados:"), BorderLayout.NORTH);
         problemasArea = new JTextArea();
         problemasPanel.add(new JScrollPane(problemasArea), BorderLayout.CENTER);
         add(problemasPanel, BorderLayout.CENTER);
 
         // Panel para las observaciones (CheckBoxes)
-        JPanel observacionesPanel = new JPanel(new GridLayout(2, 2, 10, 10)); // Cambiar a 2 filas y 2 columnas
-        observacionesPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Añadir márgenes
+        JPanel observacionesPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        observacionesPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         cargadorCheckBox = new JCheckBox("Cargador");
         observacionesPanel.add(cargadorCheckBox);
 
@@ -76,32 +73,36 @@ public class GenerarOrder extends JFrame {
 
         cableDatosCheckBox = new JCheckBox("Cable datos");
         observacionesPanel.add(cableDatosCheckBox);
-        
-        observacionesPanel.add(new JLabel("Otros cables:"));
+
+        observacionesPanel.add(new JLabel("Otros:"));
         otrosCablesField = new JTextArea();
         observacionesPanel.add(otrosCablesField);
 
         // Panel para los botones
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10)); // Centrar botones y añadir espacios
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Añadir márgenes
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         ordenButton = new RoundRedButton("Realizar orden");
         menuButton = new RoundRedButton("Regresar al menú");
 
-        ordenButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Aquí puedes agregar la lógica para realizar la orden
-                System.out.println("Orden realizada");
+        ordenButton.addActionListener(e -> {
+            String cedula = cedula_Cliente.getText();
+            if (prueba.idClienteExiste(cedula)) {
+                obtenerDatos();
+                crearOrden();
+                JOptionPane.showMessageDialog(this, "Orden guardada con éxito.", "Información", JOptionPane.INFORMATION_MESSAGE);
+                resetearCampos();
+            } else {
+                aggCliente.btnRegresarMenu.setText("Regresar");
+                aggCliente.CI.setText(cedula); // Pasar la cédula al JFrame de AgregarCliente
+                aggCliente.setVisible(true);
+                this.setVisible(false);
             }
         });
 
-        menuButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false); // Oculta la ventana actual
-                menuFrame.setVisible(true); // Muestra el menú principal
-            }
+        menuButton.addActionListener(e -> {
+            setVisible(false); // Oculta la ventana actual
+            menuFrame.setVisible(true); // Muestra el menú principal
         });
 
         buttonPanel.add(ordenButton);
@@ -109,21 +110,44 @@ public class GenerarOrder extends JFrame {
 
         // Panel contenedor para observaciones y botones
         JPanel southPanel = new JPanel(new BorderLayout());
-        southPanel.add(observacionesPanel, BorderLayout.CENTER); // Agregar observaciones al centro
-        southPanel.add(buttonPanel, BorderLayout.SOUTH); // Agregar botones al sur
+        southPanel.add(observacionesPanel, BorderLayout.CENTER);
+        southPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Añadir el panel contenedor a la región Sur
         add(southPanel, BorderLayout.SOUTH);
 
         // Centrar la ventana en la pantalla
         setLocationRelativeTo(null);
+        
+        ((AbstractDocument) cedula_Cliente.getDocument()).setDocumentFilter(new LimitFilter(10));
+
     }
-    //usar despues de validar que existe un nuevo cliente
-    public void obtenerDatos(){
-        String articulo=articuloField.getText(),
-                marca=marcaField.getText(),
-                modelo=modeloField.getText(),
-                serie=serieField.getText();
-        int idCliente=prueba.getIdClienteXCedula(cedula_Cliente.getText());      
-        equipo=new Equipo(articulo,marca,modelo,serie,idCliente);
-    }}
+
+    public void crearOrden() {
+        prueba.insertOrden(equipo.getId_equipo(), fecha);
+    }
+
+    public void obtenerDatos() {
+        String articulo = articuloField.getText(),
+                marca = marcaField.getText(),
+                modelo = modeloField.getText(),
+                serie = serieField.getText();
+        int idCliente = prueba.getIdClienteXCedula(cedula_Cliente.getText());
+        equipo = new Equipo(articulo, marca, modelo, serie, idCliente);
+    }
+    public void resetearCampos() {
+    
+        articuloField.setText(""); // Limpiar campo de artículo
+        marcaField.setText("");     // Limpiar campo de marca
+        modeloField.setText("");    // Limpiar campo de modelo
+        serieField.setText("");     // Limpiar campo de número de serie
+        cedula_Cliente.setText(""); // Limpiar campo de cédula
+    
+        problemasArea.setText("");  // Limpiar área de problemas reportados
+        otrosCablesField.setText(""); // Limpiar área de otros cables
+
+        cargadorCheckBox.setSelected(false);    // Desmarcar cargador
+        bateriaCheckBox.setSelected(false);     // Desmarcar batería
+        cablePoderCheckBox.setSelected(false);  // Desmarcar cable de poder
+        cableDatosCheckBox.setSelected(false);  // Desmarcar cable de datos
+    }
+}

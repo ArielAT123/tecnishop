@@ -12,6 +12,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -19,31 +20,31 @@ import javax.swing.border.LineBorder;
 import javax.swing.text.AbstractDocument;
 
 public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
-    private String nombre, apellido, correo, telefono, ci;
-    private MenuFrame menuFrame;
-    private javax.swing.JButton btnRegresarMenu;
-    private javax.swing.JButton InsertButton;
-    private javax.swing.JTextField nombreCliente;
-    private javax.swing.JTextField apellidoCliente;
-    private javax.swing.JTextField correoCliente;
-    private javax.swing.JTextField telefonoCliente;
-    private javax.swing.JTextField CI;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JPanel jPanel1;
-    private pruebaSQL prueba;
+    protected String nombre, apellido, correo, telefono, ci;
+    protected JFrame previus;
+    protected javax.swing.JButton btnRegresarMenu;
+    protected javax.swing.JButton InsertButton;
+    protected javax.swing.JTextField nombreCliente;
+    protected javax.swing.JTextField apellidoCliente;
+    protected javax.swing.JTextField correoCliente;
+    protected javax.swing.JTextField telefonoCliente;
+    protected javax.swing.JTextField CI;
+    protected javax.swing.JLabel jLabel1;
+    protected javax.swing.JLabel jLabel2;
+    protected javax.swing.JLabel jLabel3;
+    protected javax.swing.JLabel jLabel4;
+    protected javax.swing.JLabel jLabel5;
+    protected javax.swing.JPanel jPanel1;
+    protected pruebaSQL prueba;
 
-    public VentanaAgregarCLienteJFrame(MenuFrame menuFrame) {
-        this.menuFrame = menuFrame;
+    public VentanaAgregarCLienteJFrame(JFrame menuFrame) {
+        this.previus = menuFrame;
         initComponents();
         setSize(600, 500); // Tamaño de la ventana
         setLocationRelativeTo(null); // Centrar la ventana
     }
 
-    public boolean isDefault() {
+    protected boolean isDefault() {
         return (
                 nombre.equals("Ingrese nombre")
                         || apellido.equals("Ingrese apellido")
@@ -53,7 +54,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         );
     }
 
-    private void initComponents() {
+    protected void initComponents() {
         jPanel1 = new javax.swing.JPanel();
         InsertButton = new RoundRedButton("Insertar");
         nombreCliente = new javax.swing.JTextField();
@@ -117,7 +118,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setVisible(false); // Oculta la ventana actual
-                menuFrame.setVisible(true); // Muestra el menú principal
+                previus.setVisible(true); // Muestra el menú principal
             }
         });
 
@@ -199,7 +200,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     }
 
     // Método para capturar los datos cuando se presiona "Insertar"
-    private void guardarDatos() {
+    protected void guardarDatos() {
         nombre = nombreCliente.getText();
         apellido = apellidoCliente.getText();
         correo = correoCliente.getText();
@@ -213,7 +214,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     }
 
     // Métodos para configurar los JTextField y JLabel
-    private void configurarCampoTexto(JTextField campo, String placeholder) {
+    protected void configurarCampoTexto(JTextField campo, String placeholder) {
         campo.setText(placeholder);
         campo.setFont(new Font("Arial", Font.PLAIN, 14));
         campo.setForeground(Color.GRAY);
@@ -221,13 +222,13 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
         campo.setPreferredSize(new Dimension(200, 30)); // Tamaño preferido
     }
 
-    private void configurarEtiqueta(JLabel etiqueta) {
+    protected void configurarEtiqueta(JLabel etiqueta) {
         etiqueta.setFont(new Font("Arial", Font.BOLD, 14));
         etiqueta.setForeground(new Color(25, 25, 112));
     }
 
     // Método para restablecer los campos de texto a sus valores iniciales
-    private void resetearCampos() {
+    protected void resetearCampos() {
         nombreCliente.setText("Ingrese nombre");
         nombreCliente.setForeground(Color.GRAY);
 

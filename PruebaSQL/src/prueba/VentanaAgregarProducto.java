@@ -15,12 +15,13 @@ import javax.swing.border.LineBorder;
  *
  * @author Ernesto
  */
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javax.swing.JFrame;
+
 
 public class VentanaAgregarProducto extends javax.swing.JFrame {
 
@@ -32,11 +33,12 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
     int cantidad;
     String codigo;
 
-    private MenuFrame menuFrame; // Referencia al menú principal
+    private JFrame previus; // Referencia al menú principal
+    
 
     // Constructor que recibe la referencia al menú principal
     public VentanaAgregarProducto(MenuFrame menuFrame) {
-        this.menuFrame = menuFrame; // Asignar la referencia
+        this.previus = menuFrame; // Asignar la referencia
         initComponents();
         setSize(600, 500); // Tamaño de la ventana
         setLocationRelativeTo(null); // Centrar la ventana en la pantalla
@@ -51,13 +53,15 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         porcentajeGananciaProducto = new javax.swing.JTextField();
         impuestoProducto = new javax.swing.JTextField();
         cantidadProducto = new javax.swing.JTextField();
+        codigo_producto = new javax.swing.JTextField(); // Nuevo JTextField para Código Producto
         jLabel1 = new javax.swing.JLabel("Nombre:");
         jLabel2 = new javax.swing.JLabel("Descripción:");
         jLabel3 = new javax.swing.JLabel("Costo Compra:");
         jLabel4 = new javax.swing.JLabel("Porcentaje Ganancia:");
         jLabel5 = new javax.swing.JLabel("Impuesto:");
         jLabel6 = new javax.swing.JLabel("Cantidad:");
-        btnRegresarMenu = new RoundRedButton("Regresar al Menú"); // Botón para regresar al menú
+        jLabel7 = new javax.swing.JLabel("Código Producto:"); // Nueva etiqueta
+        btnRegresarMenu = new RoundRedButton("Regresar al Menú"); 
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Registro Producto");
@@ -72,6 +76,7 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         configurarCampoTexto(porcentajeGananciaProducto, "Ingrese % ganancia");
         configurarCampoTexto(impuestoProducto, "Ingrese IVA");
         configurarCampoTexto(cantidadProducto, "Ingrese cantidad");
+        configurarCampoTexto(codigo_producto, "Ingrese código"); // Nuevo campo
 
         // Agregar eventos de focus
         agregarEventoFocus(nombreProducto, "Ingrese nombre");
@@ -80,6 +85,7 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         agregarEventoFocus(porcentajeGananciaProducto, "Ingrese % ganancia");
         agregarEventoFocus(impuestoProducto, "Ingrese IVA");
         agregarEventoFocus(cantidadProducto, "Ingrese cantidad");
+        agregarEventoFocus(codigo_producto, "Ingrese código"); // Nuevo campo
 
         // Configurar etiquetas
         configurarEtiqueta(jLabel1);
@@ -88,6 +94,7 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         configurarEtiqueta(jLabel4);
         configurarEtiqueta(jLabel5);
         configurarEtiqueta(jLabel6);
+        configurarEtiqueta(jLabel7); // Nueva etiqueta
 
         // Acción para el botón "Insertar"
         InsertButton.addActionListener(new ActionListener() {
@@ -103,16 +110,18 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         btnRegresarMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setVisible(false); // Oculta la ventana actual
-                menuFrame.setVisible(true); // Muestra el menú principal
+                setVisible(false); 
+                previus.setVisible(true); 
             }
         });
+        
+        
 
         // Usar GridBagLayout para un mejor control de la disposición
         jPanel1.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Espaciado entre componentes
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Ajustar componentes horizontalmente
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Agregar componentes al panel
         gbc.gridx = 0;
@@ -158,10 +167,17 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         jPanel1.add(cantidadProducto, gbc);
 
         gbc.gridx = 0;
+        gbc.gridy = 6; // Nueva fila para Código Producto
+        jPanel1.add(jLabel7, gbc);
+
+        gbc.gridx = 1;
+        jPanel1.add(codigo_producto, gbc);
+
+        gbc.gridx = 0;
         gbc.gridy = 7;
-        gbc.gridwidth = 2; // Ocupar dos columnas
-        gbc.fill = GridBagConstraints.NONE; // No ajustar el tamaño del botón
-        gbc.anchor = GridBagConstraints.CENTER; // Centrar el botón
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
         jPanel1.add(InsertButton, gbc);
 
         gbc.gridy = 8;
@@ -170,16 +186,7 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         getContentPane().add(jPanel1);
         pack();
     }
-
-    private void configurarCampoTexto(JTextField campo, String placeholder) {
-        campo.setBackground(Color.WHITE);
-        campo.setBorder(new LineBorder(new Color(200, 0, 0), 1));
-        campo.setForeground(Color.GRAY);
-        campo.setText(placeholder);
-        campo.setPreferredSize(new Dimension(200, 30)); // Tamaño preferido
-    }
-
-    private void agregarEventoFocus(JTextField campo, String placeholder) {
+     private void agregarEventoFocus(JTextField campo, String placeholder) {
         campo.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -203,7 +210,15 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         etiqueta.setForeground(new Color(200, 0, 0));
         etiqueta.setFont(new Font("Arial", Font.BOLD, 12));
     }
-
+    
+    private void configurarCampoTexto(JTextField campo, String placeholder) {
+        campo.setBackground(Color.WHITE);
+        campo.setBorder(new LineBorder(new Color(200, 0, 0), 1));
+        campo.setForeground(Color.GRAY);
+        campo.setText(placeholder);
+        campo.setPreferredSize(new Dimension(200, 30));
+    }
+    
     private void guardarDatos() {
         nombre = nombreProducto.getText();
         descripcion = descripcionProducto.getText();
@@ -211,6 +226,7 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         cantidad = Integer.parseInt(cantidadProducto.getText());
         porcentajeGanancia = Double.parseDouble(porcentajeGananciaProducto.getText());
         impuesto = Double.parseDouble(impuestoProducto.getText());
+        codigo = codigo_producto.getText();
         JOptionPane.showMessageDialog(this,
                 "Datos Guardados:\nNombre: " + nombre + "\nDescripción: " + descripcion +
                         "\nPrecio: " + costoCompra + "\nStock: " + cantidad,
@@ -232,6 +248,7 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         cantidadProducto.setForeground(Color.GRAY);
         codigo_producto.setText("Ingrese codigo");
         codigo_producto.setForeground(Color.GRAY);
+        
     }
 
     private javax.swing.JButton InsertButton;
