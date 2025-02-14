@@ -2,7 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package prueba;
+package prueba.ClasesTablas;
+
+import prueba.pruebaSQL;
 
 /**
  *
@@ -13,7 +15,6 @@ public class Equipo {
     private String articulo,marca, modelo,numero_serie;
     private int id_Cliente;
     private int id_equipo;
-
     public Equipo(String articulo, String marca, String modelo, String numero_serie, int id_cliente) {
         this.articulo = articulo;
         this.marca = marca;

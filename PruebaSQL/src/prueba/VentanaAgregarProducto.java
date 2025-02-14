@@ -4,6 +4,7 @@
  */
 package prueba;
 
+import prueba.ClasesTablas.RoundRedButton;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JLabel;
@@ -27,14 +28,13 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
 
     String nombre;
     String descripcion;
-    double costoCompra;
-    double porcentajeGanancia;
-    double impuesto;
-    int cantidad;
+    Double costoCompra;
+    Double porcentajeGanancia;
+    Double impuesto;
+    Integer cantidad;
     String codigo;
 
     private JFrame previus; // Referencia al menú principal
-    
 
     // Constructor que recibe la referencia al menú principal
     public VentanaAgregarProducto(MenuFrame menuFrame) {
@@ -101,6 +101,7 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 guardarDatos();
+                pruebaSQL.insertProducto(nombre, descripcion, costoCompra, porcentajeGanancia, impuesto, cantidad, codigo);
                 JOptionPane.showMessageDialog(null, "Producto guardado correctamente.");
                 resetearCampos();
             }
@@ -185,6 +186,9 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
 
         getContentPane().add(jPanel1);
         pack();
+        
+               
+
     }
      private void agregarEventoFocus(JTextField campo, String placeholder) {
         campo.addFocusListener(new FocusAdapter() {
@@ -222,16 +226,23 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
     private void guardarDatos() {
         nombre = nombreProducto.getText();
         descripcion = descripcionProducto.getText();
-        costoCompra = Double.parseDouble(costoCompraProducto.getText());
-        cantidad = Integer.parseInt(cantidadProducto.getText());
-        porcentajeGanancia = Double.parseDouble(porcentajeGananciaProducto.getText());
-        impuesto = Double.parseDouble(impuestoProducto.getText());
         codigo = codigo_producto.getText();
+        costoCompra = validarCostoCompra();
+        porcentajeGanancia = validarPorcentajeGanancia();
+        impuesto = validarImpuesto();
+        cantidad = validarCantidad();
+    
+
         JOptionPane.showMessageDialog(this,
-                "Datos Guardados:\nNombre: " + nombre + "\nDescripción: " + descripcion +
-                        "\nPrecio: " + costoCompra + "\nStock: " + cantidad,
-                "Información", JOptionPane.INFORMATION_MESSAGE);
+            "Datos Guardados:\nNombre: " + nombre + 
+            "\nDescripción: " + descripcion +
+            "\nCosto de Compra: " + costoCompra + 
+            "\nCantidad: " + cantidad +
+            "\nPorcentaje de Ganancia: " + porcentajeGanancia +
+            "\nImpuesto: " + impuesto,
+            "Información", JOptionPane.INFORMATION_MESSAGE);
     }
+
 
     private void resetearCampos() {
         nombreProducto.setText("Ingrese nombre");
@@ -250,6 +261,42 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
         codigo_producto.setForeground(Color.GRAY);
         
     }
+        
+    private Double validarCostoCompra() {
+        String texto = costoCompraProducto.getText();
+        if (Utilitaria.esNumeroValido(texto)) {
+            double valor = Double.parseDouble(texto);
+            return (valor >= 0) ? valor : null;
+        }
+        return null;
+    }
+    
+    private Double validarPorcentajeGanancia() {
+        String texto = porcentajeGananciaProducto.getText();
+        if (Utilitaria.esNumeroValido(texto)) {
+            double valor = Double.parseDouble(texto);
+            return (valor >= 0 && valor < 1) ? valor : null;
+        }
+        return null;
+    }
+    
+    private Double validarImpuesto() {
+        String texto = impuestoProducto.getText();
+        if (Utilitaria.esNumeroValido(texto)) {
+            double valor = Double.parseDouble(texto);
+            return (valor >= 0 && valor < 1) ? valor : null;
+        }
+        return null;
+    }
+    private Integer validarCantidad() {
+        String texto = cantidadProducto.getText();
+        if (Utilitaria.esEnteroValido(texto)) {
+            int valor = Integer.parseInt(texto);
+            return (valor >= 0) ? valor : null;
+        }
+        return null;
+    }
+
 
     private javax.swing.JButton InsertButton;
     private javax.swing.JButton btnRegresarMenu; // Botón para regresar al menú

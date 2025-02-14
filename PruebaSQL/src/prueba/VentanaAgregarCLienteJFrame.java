@@ -4,6 +4,8 @@
  */
 package prueba;
 
+import prueba.ClasesTablas.RoundRedButton;
+import prueba.ClasesTablas.LimitFilter;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -35,7 +37,6 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     protected javax.swing.JLabel jLabel4;
     protected javax.swing.JLabel jLabel5;
     protected javax.swing.JPanel jPanel1;
-    protected pruebaSQL prueba;
 
     public VentanaAgregarCLienteJFrame(JFrame menuFrame) {
         this.previus = menuFrame;
@@ -107,7 +108,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
             public void actionPerformed(ActionEvent e) {
                 guardarDatos();
                 if (!isDefault()) {
-                    prueba.insertCliente(nombre, apellido, telefono, correo, ci);
+                    pruebaSQL.insertCliente(nombre, apellido, telefono, correo, ci);
                 }
                 resetearCampos();
             }

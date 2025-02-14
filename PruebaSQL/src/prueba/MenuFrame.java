@@ -3,13 +3,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package prueba;
+import prueba.ClasesTablas.RoundRedButton;
 import javax.swing.*;
 import java.awt.*;
+import prueba.cosas.TablaProductos;
 
 public class MenuFrame extends JFrame {
     private final VentanaAgregarProducto aggProducto = new VentanaAgregarProducto(this);
     private final VentanaAgregarCLienteJFrame aggCliente = new VentanaAgregarCLienteJFrame(this);
     private final GenerarOrder generarOrden = new GenerarOrder(this);
+    private final TablaProductos gestionProductos = new TablaProductos(this);
 
     public MenuFrame() {
         setTitle("Menú Principal");
@@ -63,7 +66,10 @@ public class MenuFrame extends JFrame {
                 this.setVisible(false);
         }
         );
-        btnGestionarProducto.addActionListener(e -> showMessage("Gestionar Producto seleccionado"));
+        btnGestionarProducto.addActionListener(e ->{
+            gestionProductos.setVisible(true);
+            this.setVisible(false);
+        } );
     }
 
     

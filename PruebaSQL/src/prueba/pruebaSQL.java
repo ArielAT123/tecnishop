@@ -5,7 +5,6 @@
 package prueba;
 
 import java.sql.*;
-
 /**
  *
  * @author Ernesto
@@ -62,22 +61,47 @@ public class pruebaSQL {
             System.out.println("Error al obtener cliente: " + e.getMessage());
         }
     }
-    public static void insertProducto(String nombre, String descripcion, double costoCompra, double porcentajeGanancia, double impuesto, int cantidad) {
-    String query = "INSERT INTO producto (nombre, descripcion, costo_compra, porcentaje_ganancia, impuesto, cantidad) VALUES (?, ?, ?, ?, ?, ?)";
+    public static void insertProducto(String nombre, String descripcion, Double costoCompra, Double porcentajeGanancia, Double impuesto, Integer cantidad, String codigo) {
+    String query = "INSERT INTO producto (nombre, descripcion, costo_compra, porcentaje_ganancia, impuesto, cantidad, codigo) VALUES (?, ?, ?, ?, ?, ?, ?)";
     try (Connection conn = connect();
          PreparedStatement stmt = conn.prepareStatement(query)) {
+        
         stmt.setString(1, nombre);
         stmt.setString(2, descripcion);
-        stmt.setDouble(3, costoCompra);
-        stmt.setDouble(4, porcentajeGanancia);
-        stmt.setDouble(5, impuesto);
-        stmt.setInt(6, cantidad);
+        
+        // Verificamos si es null para usar setNull()
+        if (costoCompra != null) {
+            stmt.setDouble(3, costoCompra);
+        } else {
+            stmt.setNull(3, java.sql.Types.DOUBLE);
+        }
+        
+        if (porcentajeGanancia != null) {
+            stmt.setDouble(4, porcentajeGanancia);
+        } else {
+            stmt.setNull(4, java.sql.Types.DOUBLE);
+        }
+        
+        if (impuesto != null) {
+            stmt.setDouble(5, impuesto);
+        } else {
+            stmt.setNull(5, java.sql.Types.DOUBLE);
+        }
+        
+        if (cantidad != null) {
+            stmt.setInt(6, cantidad);
+        } else {
+            stmt.setNull(6, java.sql.Types.INTEGER);
+        }
+        stmt.setString(7, codigo);
+        
         stmt.executeUpdate();
         System.out.println("Producto guardado correctamente.");
     } catch (Exception e) {
         System.out.println("Error al guardar producto: " + e.getMessage());
     }
 }
+
     public static void getLastProducto() {
     String query = "SELECT * FROM producto ORDER BY id DESC LIMIT 1";
     try (Connection conn = connect();
@@ -117,7 +141,7 @@ public class pruebaSQL {
     }
     return clienteId;
 }
-    public boolean idClienteExiste(String ci){
+    public static boolean idClienteExiste(String ci){
         return getIdClienteXCedula(ci)!=0;
     }
     
@@ -164,6 +188,52 @@ public class pruebaSQL {
     return generatedId;
     }
     
-    public static void insertObservaciones(){}        
+    
+    public static int insertObservacion(Integer equipo_id, Boolean cargador, Boolean bateria, Boolean cable_poder, Boolean cable_datos, String otros) {
+    String query = "INSERT INTO observaciones (equipo_id, cargador, bateria, cable_poder, cable_datos, otros) VALUES (?, ?, ?, ?, ?, ?)";
+    int generatedId = -1; // Valor por defecto en caso de error
+
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+
+        stmt.setInt(1, equipo_id);
+        stmt.setBoolean(2, cargador);
+        stmt.setBoolean(3, bateria);
+        stmt.setBoolean(4, cable_poder);
+        stmt.setBoolean(5, cable_datos);
+        if (otros != null) {
+            stmt.setString(6, otros);
+        } else {
+            stmt.setNull(6, java.sql.Types.INTEGER);
+        }
+        stmt.executeUpdate();
+
+        // Obtener el ID generado
+        try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                generatedId = generatedKeys.getInt(1);
+                System.out.println("Observación guardada correctamente. ID: " + generatedId);
+            } else {
+                System.out.println("Error al obtener el ID generado.");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Error al guardar observación: " + e.getMessage());
+    }
+
+    return generatedId;
+    }
+    
+
+    public static void insertProblema(Integer id_equipo, String problema){
+        String query="INSERT INTO problema_equipo(equipo_id, problema) VALUES (?,?)"; 
+        try (Connection conn = connect();
+        PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setInt(1, id_equipo);
+        stmt.setString(2, problema);
+        }catch(Exception e){
+            System.out.println("Error al guardar");
+        }
+    }
 }
 

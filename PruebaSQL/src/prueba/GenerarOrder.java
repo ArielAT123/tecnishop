@@ -1,9 +1,13 @@
 package prueba;
 
+import prueba.ClasesTablas.RoundRedButton;
+import prueba.ClasesTablas.LimitFilter;
+import prueba.ClasesTablas.Equipo;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Date;
 import javax.swing.text.AbstractDocument;
+import prueba.ClasesTablas.Observacion;
 
 public class GenerarOrder extends JFrame {
     private JTextField articuloField, marcaField, modeloField, serieField, cedula_Cliente;
@@ -14,9 +18,8 @@ public class GenerarOrder extends JFrame {
     private VentanaAgregarCLienteJFrame aggCliente = new VentanaAgregarCLienteJFrame(this);
     // Datos para la orden
     private Equipo equipo;
+    private Observacion observacion;
     private Date fecha = Date.valueOf(java.time.LocalDate.now());
-    private pruebaSQL prueba = new pruebaSQL();
-
     public GenerarOrder(MenuFrame menuFrame) {
         this.menuFrame = menuFrame;
         setTitle("Formulario de Equipo");
@@ -87,7 +90,7 @@ public class GenerarOrder extends JFrame {
 
         ordenButton.addActionListener(e -> {
             String cedula = cedula_Cliente.getText();
-            if (prueba.idClienteExiste(cedula)) {
+            if (pruebaSQL.idClienteExiste(cedula)) {
                 obtenerDatos();
                 crearOrden();
                 JOptionPane.showMessageDialog(this, "Orden guardada con éxito.", "Información", JOptionPane.INFORMATION_MESSAGE);
@@ -123,16 +126,26 @@ public class GenerarOrder extends JFrame {
     }
 
     public void crearOrden() {
-        prueba.insertOrden(equipo.getId_equipo(), fecha);
+        pruebaSQL.insertOrden(equipo.getId_equipo(), fecha);
     }
 
     public void obtenerDatos() {
-        String articulo = articuloField.getText(),
+        String 
+                articulo = articuloField.getText(),
                 marca = marcaField.getText(),
                 modelo = modeloField.getText(),
-                serie = serieField.getText();
-        int idCliente = prueba.getIdClienteXCedula(cedula_Cliente.getText());
+                serie = serieField.getText(),
+                otros = otrosCablesField.getText();
+        
+        Boolean 
+                cargador=cargadorCheckBox.isSelected(),
+                bateria= bateriaCheckBox.isSelected(),
+                cable_poder=cablePoderCheckBox.isSelected() ,
+                cable_datos= cableDatosCheckBox.isSelected();
+
+        int idCliente = pruebaSQL.getIdClienteXCedula(cedula_Cliente.getText());
         equipo = new Equipo(articulo, marca, modelo, serie, idCliente);
+        observacion = new Observacion(equipo,cargador,bateria,cable_poder,cable_datos,otros);
     }
     public void resetearCampos() {
     
