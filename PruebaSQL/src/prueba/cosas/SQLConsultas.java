@@ -66,7 +66,7 @@ public class SQLConsultas extends pruebaSQL{
 
 }
     
-    public static void updateProductInDatabase(String codigo, String nombre, int cantidad, double costo_compra, double precio_venta_sugerido, double precio_venta_recomendado, double impuesto, double porcentaje_ganancia) {
+    public static void updateProductInDatabase(String codigo, String nombre, Integer cantidad, Double costo_compra, Double precio_venta_sugerido, Double precio_venta_recomendado, Double impuesto, Double porcentaje_ganancia) {
     String query = "UPDATE producto SET nombre = ?, cantidad = ?, costo_compra = ?, precio_venta_sugerido = ?, precio_venta_recomendado = ?, impuesto = ?, porcentaje_ganancia = ? WHERE codigo = ?";
 
     try (Connection conn = connect(); // Asegúrate de que el método connect() devuelva una conexión válida
@@ -80,7 +80,7 @@ public class SQLConsultas extends pruebaSQL{
         pstmt.setDouble(5, precio_venta_recomendado);
         pstmt.setDouble(6, impuesto);
         pstmt.setDouble(7, porcentaje_ganancia);
-        pstmt.setString(8, codigo); // Usar el código como identificador único
+        pstmt.setString(8, codigo); 
 
         // Ejecutar la actualización
         int rowsAffected = pstmt.executeUpdate();

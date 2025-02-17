@@ -12,7 +12,7 @@ public class MenuFrame extends JFrame {
     private final VentanaAgregarProducto aggProducto = new VentanaAgregarProducto(this);
     private final VentanaAgregarCLienteJFrame aggCliente = new VentanaAgregarCLienteJFrame(this);
     private final GenerarOrder generarOrden = new GenerarOrder(this);
-    private final TablaProductos gestionProductos = new TablaProductos(this);
+    private  TablaProductos gestionProductos;
 
     public MenuFrame() {
         setTitle("Menú Principal");
@@ -50,7 +50,9 @@ public class MenuFrame extends JFrame {
         panel.add(btnGestionarProducto);
 
         add(panel, BorderLayout.CENTER);
-
+        
+        
+       
         btnAgregarProducto.addActionListener(e -> {
             aggProducto.setVisible(true);
             this.setVisible(false); 
@@ -67,6 +69,7 @@ public class MenuFrame extends JFrame {
         }
         );
         btnGestionarProducto.addActionListener(e ->{
+            gestionProductos = new TablaProductos(this);
             gestionProductos.setVisible(true);
             this.setVisible(false);
         } );
