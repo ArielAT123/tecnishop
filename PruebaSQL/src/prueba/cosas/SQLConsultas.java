@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
+import java.util.function.Consumer;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import prueba.pruebaSQL;
@@ -42,56 +43,86 @@ public class SQLConsultas extends pruebaSQL{
             System.out.println("No se pudo conectar a la base");
         }
     }
-    public static void loadProductsFromDatabase(DefaultTableModel tableModel) {
-    String query = "SELECT codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia FROM producto";
-    try (Connection conn = connect()) {
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(query);
+    
+    public static void executeTransaction(Consumer<Connection> operation) {
+        Connection conn = null;
+        try {
+            conn = connect(); // Obtener la conexión
+            conn.setAutoCommit(false); // Desactivar autocommit
 
-        while (rs.next()) {
-            Vector<Object> row = new Vector<>();
-            row.add(rs.getString("codigo")); // String
-            row.add(rs.getString("nombre")); // String
-            row.add(rs.getInt("cantidad")); // Integer
-            row.add(rs.getDouble("costo_compra")); // Double
-            row.add(rs.getDouble("precio_venta_sugerido")); // Double
-            row.add(rs.getDouble("precio_venta_recomendado")); // Double
-            row.add(rs.getDouble("impuesto")); // Double
-            row.add(rs.getDouble("porcentaje_ganancia")); // Double
-            tableModel.addRow(row);
+            operation.accept(conn); // Ejecutar la operación
+
+            conn.commit(); // Confirmar la transacción
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Revertir la transacción en caso de error
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Restaurar autocommit
+                    conn.close(); // Cerrar la conexión
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
     }
+    public static void loadProductsFromDatabase(DefaultTableModel tableModel) {
+        String query = "SELECT codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia FROM producto";
 
-}
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                Vector<Object> row = new Vector<>();
+                row.add(rs.getString("codigo"));
+                row.add(rs.getString("nombre"));
+                row.add(rs.getInt("cantidad"));
+                row.add(rs.getDouble("costo_compra"));
+                row.add(rs.getDouble("precio_venta_sugerido"));
+                row.add(rs.getDouble("precio_venta_recomendado"));
+                row.add(rs.getDouble("impuesto"));
+                row.add(rs.getDouble("porcentaje_ganancia"));
+                tableModel.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     
     public static void updateProductInDatabase(String codigo, String nombre, Integer cantidad, Double costo_compra, Double precio_venta_sugerido, Double precio_venta_recomendado, Double impuesto, Double porcentaje_ganancia) {
-    String query = "UPDATE producto SET nombre = ?, cantidad = ?, costo_compra = ?, precio_venta_sugerido = ?, precio_venta_recomendado = ?, impuesto = ?, porcentaje_ganancia = ? WHERE codigo = ?";
+        String query = "UPDATE producto SET nombre = ?, cantidad = ?, costo_compra = ?, precio_venta_sugerido = ?, precio_venta_recomendado = ?, impuesto = ?, porcentaje_ganancia = ? WHERE codigo = ?";
 
-    try (Connection conn = connect(); // Asegúrate de que el método connect() devuelva una conexión válida
-         PreparedStatement pstmt = conn.prepareStatement(query)) {
+        executeTransaction(conn -> {
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                // Establecer los parámetros en la consulta
+                pstmt.setString(1, nombre);
+                pstmt.setInt(2, cantidad);
+                pstmt.setDouble(3, costo_compra);
+                pstmt.setDouble(4, precio_venta_sugerido);
+                pstmt.setDouble(5, precio_venta_recomendado);
+                pstmt.setDouble(6, impuesto);
+                pstmt.setDouble(7, porcentaje_ganancia);
+                pstmt.setString(8, codigo);
 
-        // Establecer los parámetros en la consulta
-        pstmt.setString(1, nombre);
-        pstmt.setInt(2, cantidad);
-        pstmt.setDouble(3, costo_compra);
-        pstmt.setDouble(4, precio_venta_sugerido);
-        pstmt.setDouble(5, precio_venta_recomendado);
-        pstmt.setDouble(6, impuesto);
-        pstmt.setDouble(7, porcentaje_ganancia);
-        pstmt.setString(8, codigo); 
+                // Ejecutar la actualización
+                int rowsAffected = pstmt.executeUpdate();
 
-        // Ejecutar la actualización
-        int rowsAffected = pstmt.executeUpdate();
-
-        if (rowsAffected > 0) {
-            System.out.println("Producto actualizado correctamente.");
-        } else {
-            System.out.println("No se encontró el producto con código: " + codigo);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
+                if (rowsAffected > 0) {
+                    System.out.println("Producto actualizado correctamente. Rows afected: "+rowsAffected);
+                } else {
+                    System.out.println("No se encontró el producto con código: " + codigo);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("Error al ejecutar la consulta", e);
+            }
+        });
     }
-}
 }

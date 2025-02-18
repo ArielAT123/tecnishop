@@ -9,6 +9,8 @@ package prueba.cosas;
  * @author Ernesto
  */
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import prueba.ClasesTablas.RoundRedButton;
@@ -21,7 +23,7 @@ public class TablaProductos extends JFrame {
     private JFrame previus;
     private RoundRedButton regresar;
     private JLabel cantidad;
-    int selectedRow;
+    private int selectedRow;
 
     public TablaProductos(JFrame previus) {
         setTitle("Product Table");
@@ -43,14 +45,26 @@ public class TablaProductos extends JFrame {
         // Crear la tabla con el modelo
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
-        selectedRow = table.getSelectedRow(); // Obtener la fila seleccionada
 
+        // Inicializar selectedRow
+        selectedRow = -1;
+
+        // Agregar un ListSelectionListener a la tabla
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    selectedRow = table.getSelectedRow();
+                    cantidad.setText((selectedRow != -1) ? "Fila seleccionada: " + (selectedRow) : "Ninguna fila seleccionada");
+                }
+            }
+        });
 
         // Botones
         updateButton = new RoundRedButton("Actualizar Fila Seleccionada");
         updateAllButton = new RoundRedButton("Actualizar Todas las Filas");
         regresar = new RoundRedButton("Regresar");
-        
+
         // Acción para regresar
         regresar.addActionListener(e -> {
             previus.setVisible(true);
@@ -65,8 +79,10 @@ public class TablaProductos extends JFrame {
                 JOptionPane.showMessageDialog(TablaProductos.this, "Por favor, seleccione una fila para actualizar.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-        String texto = (selectedRow != -1) ? String.valueOf(selectedRow) : "Ninguna fila seleccionada";
-        cantidad = new JLabel(texto);
+
+        // Inicializar la etiqueta cantidad
+        cantidad = new JLabel("Ninguna fila seleccionada");
+
         // Acción para actualizar todas las filas
         updateAllButton.addActionListener(e -> {
             for (int row = 0; row < tableModel.getRowCount(); row++) {
@@ -103,7 +119,6 @@ public class TablaProductos extends JFrame {
             Double impuesto = Double.parseDouble(tableModel.getValueAt(row, 6).toString());
             Double porcentaje_ganancia = Double.parseDouble(tableModel.getValueAt(row, 7).toString());
 
-            // Llamar al método para actualizar la base de datos
             SQLConsultas.updateProductInDatabase(codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(TablaProductos.this, "Error: Los valores numéricos no son válidos en la fila " + (row + 1), "Error", JOptionPane.ERROR_MESSAGE);
