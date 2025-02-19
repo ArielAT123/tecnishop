@@ -26,7 +26,7 @@ public class Observacion {
         this.cable_poder = cable_poder;
         this.cable_datos = cable_datos;
         this.otros = otros;
-        this.id = pruebaSQL.insertObservacion(this.equipo_id, this.cargador, this.bateria, this.cable_poder, this.cable_datos, this.otros);
+        //this.id = pruebaSQL.insertObservacion(this.equipo_id, this.cargador, this.bateria, this.cable_poder, this.cable_datos, this.otros);
     }
 
     public Integer getId() {

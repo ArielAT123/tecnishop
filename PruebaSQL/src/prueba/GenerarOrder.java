@@ -1,32 +1,34 @@
 package prueba;
 
-import prueba.ClasesTablas.RoundRedButton;
-import prueba.ClasesTablas.LimitFilter;
-import prueba.ClasesTablas.Equipo;
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.sql.Date;
-import javax.swing.text.AbstractDocument;
+import prueba.ClasesTablas.Equipo;
+import prueba.ClasesTablas.LimitFilter;
 import prueba.ClasesTablas.Observacion;
+import prueba.ClasesTablas.RoundRedButton;
+import prueba.cosas.ExcelGenerator;
 
 public class GenerarOrder extends JFrame {
     private JTextField articuloField, marcaField, modeloField, serieField, cedula_Cliente;
     private JTextArea problemasArea, otrosCablesField;
     private JCheckBox cargadorCheckBox, bateriaCheckBox, cablePoderCheckBox, cableDatosCheckBox;
-    private RoundRedButton ordenButton, menuButton;
+    private RoundRedButton ordenButton, menuButton, generarExcelButton; // Nuevo botón
     private MenuFrame menuFrame;
     private VentanaAgregarCLienteJFrame aggCliente = new VentanaAgregarCLienteJFrame(this);
     // Datos para la orden
     private Equipo equipo;
     private Observacion observacion;
     private Date fecha = Date.valueOf(java.time.LocalDate.now());
+    private ExcelGenerator excelGenerator = new ExcelGenerator(); // Instancia de ExcelGenerator
+
     public GenerarOrder(MenuFrame menuFrame) {
         this.menuFrame = menuFrame;
         setTitle("Formulario de Equipo");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
-        
 
         // Panel para los campos de entrada
         JPanel inputPanel = new JPanel(new GridLayout(6, 2, 10, 10));
@@ -87,14 +89,14 @@ public class GenerarOrder extends JFrame {
 
         ordenButton = new RoundRedButton("Realizar orden");
         menuButton = new RoundRedButton("Regresar al menú");
+        generarExcelButton = new RoundRedButton("Generar Excel"); // Nuevo botón
 
         ordenButton.addActionListener(e -> {
             String cedula = cedula_Cliente.getText();
             if (pruebaSQL.idClienteExiste(cedula)) {
                 obtenerDatos();
                 crearOrden();
-                JOptionPane.showMessageDialog(this, "Orden guardada con éxito.", "Información", JOptionPane.INFORMATION_MESSAGE);
-                resetearCampos();
+                //resetearCampos();
             } else {
                 aggCliente.btnRegresarMenu.setText("Regresar");
                 aggCliente.CI.setText(cedula); // Pasar la cédula al JFrame de AgregarCliente
@@ -108,7 +110,15 @@ public class GenerarOrder extends JFrame {
             menuFrame.setVisible(true); // Muestra el menú principal
         });
 
+        // Acción para el botón "Generar Excel"
+        generarExcelButton.addActionListener(e -> {
+            obtenerDatos(); // Obtener los datos ingresados
+            excelGenerator.generarExcel(equipo, observacion, problemasArea.getText(), fecha); // Generar el archivo Excel
+            JOptionPane.showMessageDialog(this, "Archivo Excel generado con éxito.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        });
+
         buttonPanel.add(ordenButton);
+        buttonPanel.add(generarExcelButton); // Agregar el nuevo botón
         buttonPanel.add(menuButton);
 
         // Panel contenedor para observaciones y botones
@@ -120,9 +130,8 @@ public class GenerarOrder extends JFrame {
 
         // Centrar la ventana en la pantalla
         setLocationRelativeTo(null);
-        
-        ((AbstractDocument) cedula_Cliente.getDocument()).setDocumentFilter(new LimitFilter(10));
 
+        ((AbstractDocument) cedula_Cliente.getDocument()).setDocumentFilter(new LimitFilter(10));
     }
 
     public void crearOrden() {
@@ -130,31 +139,29 @@ public class GenerarOrder extends JFrame {
     }
 
     public void obtenerDatos() {
-        String 
-                articulo = articuloField.getText(),
+        String articulo = articuloField.getText(),
                 marca = marcaField.getText(),
                 modelo = modeloField.getText(),
                 serie = serieField.getText(),
                 otros = otrosCablesField.getText();
-        
-        Boolean 
-                cargador=cargadorCheckBox.isSelected(),
-                bateria= bateriaCheckBox.isSelected(),
-                cable_poder=cablePoderCheckBox.isSelected() ,
-                cable_datos= cableDatosCheckBox.isSelected();
+
+        Boolean cargador = cargadorCheckBox.isSelected(),
+                bateria = bateriaCheckBox.isSelected(),
+                cable_poder = cablePoderCheckBox.isSelected(),
+                cable_datos = cableDatosCheckBox.isSelected();
 
         int idCliente = pruebaSQL.getIdClienteXCedula(cedula_Cliente.getText());
         equipo = new Equipo(articulo, marca, modelo, serie, idCliente);
-        observacion = new Observacion(equipo,cargador,bateria,cable_poder,cable_datos,otros);
+        observacion = new Observacion(equipo, cargador, bateria, cable_poder, cable_datos, otros);
     }
+
     public void resetearCampos() {
-    
         articuloField.setText(""); // Limpiar campo de artículo
         marcaField.setText("");     // Limpiar campo de marca
         modeloField.setText("");    // Limpiar campo de modelo
         serieField.setText("");     // Limpiar campo de número de serie
         cedula_Cliente.setText(""); // Limpiar campo de cédula
-    
+
         problemasArea.setText("");  // Limpiar área de problemas reportados
         otrosCablesField.setText(""); // Limpiar área de otros cables
 

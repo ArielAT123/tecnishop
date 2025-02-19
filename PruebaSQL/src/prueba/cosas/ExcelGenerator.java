@@ -35,14 +35,14 @@ public class ExcelGenerator {
         row.createCell(3).setCellValue("www.intecnic.com");
 
         row = sheet.createRow(rowNum++);
-        row.createCell(3).setCellValue("CDLA. CONDOR MZ. G VILLA 13 LOCALES #1 Y #2");
+        row.createCell(3).setCellValue("CDLA. CONDOR MZ. G VILLA 13");
 
         row = sheet.createRow(rowNum++);
-        row.createCell(3).setCellValue("Teléfonos: 2128057 - 0990545798 (WhatsApp)");
+        row.createCell(3).setCellValue("Teléfonos: 0990545798 (WhatsApp)");
 
         row = sheet.createRow(rowNum++);
         row.createCell(0).setCellValue("R.U.C. 0917526758001");
-        row.createCell(3).setCellValue("email: intecnic.solutions.e@gmail.com");
+        row.createCell(3).setCellValue("email: tecnishop.imp@gmail.com");
 
         row = sheet.createRow(rowNum++);
         row.createCell(0).setCellValue("CLIENTE:");
@@ -65,7 +65,7 @@ public class ExcelGenerator {
         row.createCell(0).setCellValue(equipo.getArticulo());
         row.createCell(2).setCellValue(equipo.getMarca());
         row.createCell(4).setCellValue(equipo.getModelo());
-        row.createCell(6).setCellValue(equipo.getSerie());
+        row.createCell(6).setCellValue(equipo.getNumero_serie());
         row.createCell(8).setCellValue(problemasReportados);
 
         row = sheet.createRow(rowNum++);
@@ -78,10 +78,10 @@ public class ExcelGenerator {
         row.createCell(8).setCellValue("CABLE DATOS");
 
         row = sheet.createRow(rowNum++);
-        row.createCell(2).setCellValue(observacion.isCargador() ? "Sí" : "No");
-        row.createCell(4).setCellValue(observacion.isBateria() ? "Sí" : "No");
-        row.createCell(6).setCellValue(observacion.isCable_poder() ? "Sí" : "No");
-        row.createCell(8).setCellValue(observacion.isCable_datos() ? "Sí" : "No");
+        row.createCell(2).setCellValue(observacion.getCargador() ? "Sí" : "No");
+        row.createCell(4).setCellValue(observacion.getBateria() ? "Sí" : "No");
+        row.createCell(6).setCellValue(observacion.getCable_poder() ? "Sí" : "No");
+        row.createCell(8).setCellValue(observacion.getCable_datos() ? "Sí" : "No");
 
         row = sheet.createRow(rowNum++);
         row.createCell(2).setCellValue("OTROS:");
@@ -96,4 +96,25 @@ public class ExcelGenerator {
             throw new RuntimeException("Error al generar el archivo Excel.", e);
         }
     }
+        
+        public static void main(String[] args) {
+        // Crear un equipo
+        Equipo equipo = new Equipo("Laptop", "Dell", "Inspiron 15", "12345XYZ", 1);
+
+        // Crear una observación asociada al equipo
+        Observacion observacion = new Observacion(equipo, true, false, true, false, "Tiene rayones en la carcasa");
+
+        // Problemas reportados
+        String problemasReportados = "No enciende;Pantalla con líneas";
+
+        // Fecha actual
+        Date fecha = new Date(System.currentTimeMillis());
+
+        // Generar el archivo Excel
+        ExcelGenerator generator = new ExcelGenerator();
+        generator.generarExcel(equipo, observacion, problemasReportados, fecha);
+
+        System.out.println("Archivo Excel generado correctamente.");
+    }
+
 }
