@@ -14,6 +14,7 @@ import java.util.Vector;
 import java.util.function.Consumer;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import prueba.ClasesTablas.Cliente;
 import prueba.pruebaSQL;
 import static prueba.pruebaSQL.connect;
 
@@ -125,4 +126,32 @@ public class SQLConsultas extends pruebaSQL{
             }
         });
     }
+    
+   public static Cliente getClienteFromDatabase(int clienteId) {
+    String query = "SELECT id, CONCAT(Nombre, ' ', Apellido) AS nombre_completo, telefono, correo, CI FROM cliente WHERE id = ?";
+    
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        
+        stmt.setInt(1, clienteId);
+        ResultSet rs = stmt.executeQuery();
+        
+        if (rs.next()) {
+            return new Cliente(
+                rs.getInt("id"),
+                rs.getString("nombre_completo"), // Ya concatenado en la consulta SQL
+                rs.getString("telefono"),
+                rs.getString("correo"),
+                rs.getString("CI")
+            );
+        }
+        
+    } catch (Exception e) {
+        System.out.println("Error al obtener el cliente: " + e.getMessage());
+    }
+    
+    return null; // Retorna null si no encuentra el cliente o hay un error
+}
+
+
 }

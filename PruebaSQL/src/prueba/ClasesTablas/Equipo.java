@@ -21,7 +21,7 @@ public class Equipo {
         this.modelo = modelo;
         this.numero_serie = numero_serie;
         this.id_Cliente = id_cliente;
-        //id_equipo= prueba.insertEquipo(this.articulo, this.id_Cliente, this.marca,  this.modelo, this.numero_serie);
+        id_equipo= prueba.insertEquipo(this.articulo, this.id_Cliente, this.marca,  this.modelo, this.numero_serie);
     }
 
     public String getArticulo() {

@@ -5,6 +5,7 @@
 package prueba;
 
 import java.sql.*;
+import prueba.ClasesTablas.ProblemaEquipo;
 /**
  *
  * @author Ernesto
@@ -146,17 +147,31 @@ public class pruebaSQL {
     }
     
     
-    public static void insertOrden(int id_equipo, Date fecha) {
+    public static int insertOrden(int id_equipo, Date fecha) {
     String query = "INSERT INTO orden (equipo_id, fecha) VALUES (?, ?)";
+    int generatedId = -1; // Valor por defecto si no se genera un ID
+
     try (Connection conn = connect();
-         PreparedStatement stmt = conn.prepareStatement(query)) {
+         PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
         stmt.setInt(1, id_equipo);
         stmt.setDate(2, fecha);
         stmt.executeUpdate();
-        System.out.println("Orden guardada correctamente.");
+
+        // Obtener el ID generado
+        try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                generatedId = generatedKeys.getInt(1); // Obtener el primer campo (ID)
+                System.out.println("Orden guardada correctamente. ID de la orden: " + generatedId);
+            } else {
+                System.out.println("No se pudo obtener el ID de la orden.");
+            }
+        }
     } catch (Exception e) {
         System.out.println("Error al guardar orden: " + e.getMessage());
     }
+
+    return generatedId; // Devuelve el ID generado
 }
     public static int insertEquipo(String articulo, int id_Cliente, String marca, String modelo, String numero_serie) {
     String query = "INSERT INTO equipo (nombre, cliente_id, marca, modelo, numero_serie) VALUES (?, ?, ?, ?, ?)";
@@ -225,15 +240,23 @@ public class pruebaSQL {
     }
     
 
-    public static void insertProblema(Integer id_equipo, String problema){
-        String query="INSERT INTO problema_equipo(equipo_id, problema) VALUES (?,?)"; 
-        try (Connection conn = connect();
-        PreparedStatement stmt = conn.prepareStatement(query)) {
-        stmt.setInt(1, id_equipo);
-        stmt.setString(2, problema);
-        }catch(Exception e){
-            System.out.println("Error al guardar");
+    public static void insertProblema(ProblemaEquipo problema) {
+    Integer idEquipo = problema.getEquipo().getId_equipo();
+    String query = "INSERT INTO problema_equipo(equipo_id, problema) VALUES (?,?)"; 
+    
+    try (Connection conn = connect();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+        
+        for (String problem : problema.getProblemas()) {
+            stmt.setInt(1, idEquipo);
+            stmt.setString(2, problem);
+            stmt.executeUpdate(); // Ejecuta la inserción
         }
+        
+    } catch (Exception e) {
+        System.out.println("Error al guardar: " + e.getMessage());
     }
+}
+
 }
 

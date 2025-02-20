@@ -4,6 +4,10 @@
  */
 package prueba;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  *
  * @author Ernesto
@@ -16,5 +20,10 @@ public class Utilitaria {
     public static boolean esEnteroValido(String texto) {
     return texto.matches("-?\\d+");
 }
+    public static ArrayList<String> convertir_a_Lista(String c){
+        String[] lineas = c.split("\\r?\\n");
+        List<String> lista = new ArrayList<>(Arrays.asList(lineas));
+        return (ArrayList<String>) lista;
+    }
 
 }

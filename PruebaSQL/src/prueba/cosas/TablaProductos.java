@@ -18,10 +18,10 @@ import prueba.ClasesTablas.RoundRedButton;
 public class TablaProductos extends JFrame {
     private JTable table;
     private DefaultTableModel tableModel;
-    private RoundRedButton updateButton;
-    private RoundRedButton updateAllButton;
-    private JFrame previus;
-    private RoundRedButton regresar;
+    private final RoundRedButton updateButton;
+    private final RoundRedButton updateAllButton;
+    private final JFrame previus;
+    private final RoundRedButton regresar;
     private JLabel cantidad;
     private int selectedRow;
 

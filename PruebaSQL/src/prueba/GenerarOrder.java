@@ -4,24 +4,31 @@ import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.sql.Date;
+import prueba.ClasesTablas.Cliente;
 import prueba.ClasesTablas.Equipo;
 import prueba.ClasesTablas.LimitFilter;
 import prueba.ClasesTablas.Observacion;
+import prueba.ClasesTablas.ProblemaEquipo;
 import prueba.ClasesTablas.RoundRedButton;
 import prueba.cosas.ExcelGenerator;
+import prueba.cosas.SQLConsultas;
 
 public class GenerarOrder extends JFrame {
-    private JTextField articuloField, marcaField, modeloField, serieField, cedula_Cliente;
+    private JTextField articuloField, marcaField, modeloField, serieField, cedula_Cliente, realizaOrden;
     private JTextArea problemasArea, otrosCablesField;
     private JCheckBox cargadorCheckBox, bateriaCheckBox, cablePoderCheckBox, cableDatosCheckBox;
     private RoundRedButton ordenButton, menuButton, generarExcelButton; // Nuevo botón
     private MenuFrame menuFrame;
     private VentanaAgregarCLienteJFrame aggCliente = new VentanaAgregarCLienteJFrame(this);
     // Datos para la orden
+    private Cliente cliente;
     private Equipo equipo;
     private Observacion observacion;
     private Date fecha = Date.valueOf(java.time.LocalDate.now());
-    private ExcelGenerator excelGenerator = new ExcelGenerator(); // Instancia de ExcelGenerator
+    private ExcelGenerator excelGenerator = new ExcelGenerator();
+    private String quienRealiza;
+    private ProblemaEquipo problems;
+    int id_orden;
 
     public GenerarOrder(MenuFrame menuFrame) {
         this.menuFrame = menuFrame;
@@ -53,6 +60,10 @@ public class GenerarOrder extends JFrame {
         inputPanel.add(new JLabel("N° SERIE:"));
         serieField = new JTextField();
         inputPanel.add(serieField);
+        
+        inputPanel.add(new JLabel("Quien Realiza la Orden: "));
+        realizaOrden = new JTextField();
+        inputPanel.add(realizaOrden);
 
         add(inputPanel, BorderLayout.NORTH);
 
@@ -80,7 +91,7 @@ public class GenerarOrder extends JFrame {
         observacionesPanel.add(cableDatosCheckBox);
 
         observacionesPanel.add(new JLabel("Otros:"));
-        otrosCablesField = new JTextArea();
+        otrosCablesField = new JTextArea(" ");
         observacionesPanel.add(otrosCablesField);
 
         // Panel para los botones
@@ -112,8 +123,10 @@ public class GenerarOrder extends JFrame {
 
         // Acción para el botón "Generar Excel"
         generarExcelButton.addActionListener(e -> {
-            obtenerDatos(); // Obtener los datos ingresados
-            excelGenerator.generarExcel(equipo, observacion, problemasArea.getText(), fecha); // Generar el archivo Excel
+            obtenerDatos();
+            crearOrden();
+            cliente= SQLConsultas.getClienteFromDatabase(equipo.getId_cliente());
+            ExcelGenerator.generarOrdenExcel(quienRealiza, observacion, equipo, problems, cliente, id_orden);
             JOptionPane.showMessageDialog(this, "Archivo Excel generado con éxito.", "Información", JOptionPane.INFORMATION_MESSAGE);
         });
 
@@ -135,7 +148,7 @@ public class GenerarOrder extends JFrame {
     }
 
     public void crearOrden() {
-        pruebaSQL.insertOrden(equipo.getId_equipo(), fecha);
+        id_orden=pruebaSQL.insertOrden(equipo.getId_equipo(), fecha);
     }
 
     public void obtenerDatos() {
@@ -153,6 +166,8 @@ public class GenerarOrder extends JFrame {
         int idCliente = pruebaSQL.getIdClienteXCedula(cedula_Cliente.getText());
         equipo = new Equipo(articulo, marca, modelo, serie, idCliente);
         observacion = new Observacion(equipo, cargador, bateria, cable_poder, cable_datos, otros);
+        quienRealiza=realizaOrden.getText();
+        problems=new ProblemaEquipo(equipo,problemasArea.getText());
     }
 
     public void resetearCampos() {

@@ -4,117 +4,96 @@
  */
 package prueba.cosas;
 
-/**
- *
- * @author Ernesto
- */
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.sql.Date;
+import java.io.*;
+import java.nio.file.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import java.nio.file.Files;
+import prueba.ClasesTablas.Cliente;
 import prueba.ClasesTablas.Equipo;
 import prueba.ClasesTablas.Observacion;
+import prueba.ClasesTablas.ProblemaEquipo;
 
 public class ExcelGenerator {
-
-    public void generarExcel(Equipo equipo, Observacion observacion, String problemasReportados, Date fecha) {
-        // Crear un nuevo libro de Excel
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Orden");
-
-        // Crear el estilo para las celdas
-        CellStyle headerStyle = workbook.createCellStyle();
-        Font headerFont = workbook.createFont();
-        headerFont.setBold(true);
-        headerStyle.setFont(headerFont);
-
-        // Llenar el archivo Excel con los datos
-        int rowNum = 0;
-        Row row = sheet.createRow(rowNum++);
-        row.createCell(3).setCellValue("www.intecnic.com");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(3).setCellValue("CDLA. CONDOR MZ. G VILLA 13");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(3).setCellValue("Teléfonos: 0990545798 (WhatsApp)");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue("R.U.C. 0917526758001");
-        row.createCell(3).setCellValue("email: tecnishop.imp@gmail.com");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue("CLIENTE:");
-        row.createCell(5).setCellValue("C.I./R.U.C.:");
-        row.createCell(8).setCellValue("FECHA:");
-        row.createCell(9).setCellValue(fecha.toString());
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue("TELEFONO:");
-        row.createCell(5).setCellValue("E-MAIL:");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue("ARTICULO");
-        row.createCell(2).setCellValue("MARCA");
-        row.createCell(4).setCellValue("MODELO");
-        row.createCell(6).setCellValue("No. SERIE");
-        row.createCell(8).setCellValue("PROBLEMAS REPORTADOS");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue(equipo.getArticulo());
-        row.createCell(2).setCellValue(equipo.getMarca());
-        row.createCell(4).setCellValue(equipo.getModelo());
-        row.createCell(6).setCellValue(equipo.getNumero_serie());
-        row.createCell(8).setCellValue(problemasReportados);
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue("OBSERVACIONES");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(2).setCellValue("CARGADOR");
-        row.createCell(4).setCellValue("BATERIA");
-        row.createCell(6).setCellValue("CABLE PODER");
-        row.createCell(8).setCellValue("CABLE DATOS");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(2).setCellValue(observacion.getCargador() ? "Sí" : "No");
-        row.createCell(4).setCellValue(observacion.getBateria() ? "Sí" : "No");
-        row.createCell(6).setCellValue(observacion.getCable_poder() ? "Sí" : "No");
-        row.createCell(8).setCellValue(observacion.getCable_datos() ? "Sí" : "No");
-
-        row = sheet.createRow(rowNum++);
-        row.createCell(2).setCellValue("OTROS:");
-        row.createCell(4).setCellValue(observacion.getOtros());
-
-        // Escribir el archivo Excel
-        try (FileOutputStream fileOut = new FileOutputStream("Orden.xlsx")) {
-            workbook.write(fileOut);
+    public static void generarOrdenExcel(String quienRealiza, Observacion observacion, Equipo equipo, ProblemaEquipo problems, Cliente cliente, int id_Orden){
+        try {
+            // Construir ruta del escritorio correctamente
+            String escritorio = System.getProperty("user.home") + File.separator + "Desktop" + File.separator + "Reportes_Generados";
+            Files.createDirectories(Paths.get(escritorio));
+            
+            String nombreCliente = cliente.getNombreCompleto(); // Reemplazar con el nombre real del cliente
+            String telefono = cliente.getTelefono();  
+            String cedula = cliente.getCedula();
+            String mail = cliente.getCorreo();
+            String fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            String idOrden = "ORD"+id_Orden;
+            String cargador = observacion.getCargador() ? "Sí" : "No";
+            String bateria = observacion.getBateria() ? "Sí" : "No";
+            String cablePoder = observacion.getCable_poder() ? "Sí" : "No";
+            String cableDatos = observacion.getCable_datos() ? "Sí" : "No";
+            String otros = observacion.getOtros();
+            
+            
+       
+            
+            String nuevoNombreArchivo = "REPORTE_" + nombreCliente + "_" + fechaActual + ".xlsx";
+            
+            Path archivoOrigen = Paths.get("reporte.xlsx");
+            Path archivoDestino = Paths.get(escritorio, nuevoNombreArchivo);
+            
+            // Copiar el archivo original antes de modificarlo
+            Files.copy(archivoOrigen, archivoDestino, StandardCopyOption.REPLACE_EXISTING);	
+            FileInputStream fileInputStream = new FileInputStream(archivoDestino.toFile());
+            Workbook workbook = new XSSFWorkbook(fileInputStream);
+            fileInputStream.close();
+            
+            Sheet sheet = workbook.getSheetAt(0); // Asegúrate de que la hoja es la correcta
+            //EQUIPO
+            escribirCelda(sheet,10,0,equipo.getArticulo());
+            escribirCelda(sheet,10,2,equipo.getMarca());
+            escribirCelda(sheet,10,4,equipo.getModelo());
+            escribirCelda(sheet,10,6,equipo.getNumero_serie());
+            
+            // Escribir datos en las celdas correspondientes
+            escribirCelda(sheet, 6, 1, nombreCliente); // B7
+            escribirCelda(sheet, 33, 9, nombreCliente); // J34
+            escribirCelda(sheet, 7, 1, telefono); // B8
+            escribirCelda(sheet, 6, 6, cedula); // G7
+            escribirCelda(sheet, 7, 6, mail); // G8
+            escribirCelda(sheet, 6, 9, fechaActual); // J7
+            escribirCelda(sheet, 2, 10, idOrden); // K3
+            escribirCelda(sheet, 18, 4, cargador); // E19
+            escribirCelda(sheet, 18, 6, bateria); // G19
+            escribirCelda(sheet, 18, 8, cablePoder); // I19
+            escribirCelda(sheet, 18, 10, cableDatos); // K19
+            escribirCelda(sheet, 20, 4, otros); // E21
+            escribirCelda(sheet, 33, 1, quienRealiza); // B34
+            for(int i=0; i<problems.getProblemas().size(); i++) {
+                escribirCelda(sheet, 10+i, 8, problems.getProblemas().get(i)); 
+            }
+            
+            FileOutputStream fileOutputStream = new FileOutputStream(archivoDestino.toFile());
+            workbook.write(fileOutputStream);
             workbook.close();
-        } catch (IOException e) {
+            fileOutputStream.close();
+            
+            System.out.println("✅ Archivo generado correctamente en: " + archivoDestino);
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error al generar el archivo Excel.", e);
         }
     }
+
+    private static void escribirCelda(Sheet sheet, int rowNum, int colNum, String valor) {
+        Row row = sheet.getRow(rowNum);
+        if (row == null) row = sheet.createRow(rowNum);
         
-        public static void main(String[] args) {
-        // Crear un equipo
-        Equipo equipo = new Equipo("Laptop", "Dell", "Inspiron 15", "12345XYZ", 1);
-
-        // Crear una observación asociada al equipo
-        Observacion observacion = new Observacion(equipo, true, false, true, false, "Tiene rayones en la carcasa");
-
-        // Problemas reportados
-        String problemasReportados = "No enciende;Pantalla con líneas";
-
-        // Fecha actual
-        Date fecha = new Date(System.currentTimeMillis());
-
-        // Generar el archivo Excel
-        ExcelGenerator generator = new ExcelGenerator();
-        generator.generarExcel(equipo, observacion, problemasReportados, fecha);
-
-        System.out.println("Archivo Excel generado correctamente.");
+        Cell cell = row.getCell(colNum);
+        if (cell == null) cell = row.createCell(colNum);
+        
+        cell.setCellValue(valor);
     }
-
 }
