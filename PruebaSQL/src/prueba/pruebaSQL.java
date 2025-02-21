@@ -147,32 +147,39 @@ public class pruebaSQL {
     }
     
     
-    public static int insertOrden(int id_equipo, Date fecha) {
-    String query = "INSERT INTO orden (equipo_id, fecha) VALUES (?, ?)";
-    int generatedId = -1; // Valor por defecto si no se genera un ID
+    public static String insertOrden(int id_equipo, Date fecha) {
+        String query = "INSERT INTO orden (equipo_id, fecha) VALUES (?, ?)";
+        String generatedId = null; // Valor por defecto si no se genera un ID
 
-    try (Connection conn = connect();
-         PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
 
-        stmt.setInt(1, id_equipo);
-        stmt.setDate(2, fecha);
-        stmt.executeUpdate();
+            // Insertar la orden sin especificar el ID (el trigger lo generará)
+            stmt.setInt(1, id_equipo);
+            stmt.setDate(2, fecha);
+            stmt.executeUpdate();
 
-        // Obtener el ID generado
-        try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-            if (generatedKeys.next()) {
-                generatedId = generatedKeys.getInt(1); // Obtener el primer campo (ID)
-                System.out.println("Orden guardada correctamente. ID de la orden: " + generatedId);
-            } else {
-                System.out.println("No se pudo obtener el ID de la orden.");
-            }
+            // Recuperar el ID recién insertado
+            generatedId = obtenerUltimoIdInsertado(conn);
+            System.out.println("Orden guardada correctamente. ID de la orden: " + generatedId);
+        } catch (Exception e) {
+            System.out.println("Error al guardar orden: " + e.getMessage());
         }
-    } catch (Exception e) {
-        System.out.println("Error al guardar orden: " + e.getMessage());
+
+        return generatedId; // Devuelve el ID generado como String
     }
 
-    return generatedId; // Devuelve el ID generado
-}
+    // Método para obtener el ID de la última orden insertada
+    private static String obtenerUltimoIdInsertado(Connection conn) throws SQLException {
+        String query = "SELECT id FROM orden ORDER BY id DESC LIMIT 1"; // Obtener el último ID insertado
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("id"); // Devolver el ID como String
+            }
+        }
+        return null; // Si no se encuentra ningún ID
+    }
     public static int insertEquipo(String articulo, int id_Cliente, String marca, String modelo, String numero_serie) {
     String query = "INSERT INTO equipo (nombre, cliente_id, marca, modelo, numero_serie) VALUES (?, ?, ?, ?, ?)";
     int generatedId = -1; // Valor por defecto en caso de error

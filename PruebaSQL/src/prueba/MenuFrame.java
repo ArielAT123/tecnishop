@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package prueba;
-import prueba.ClasesTablas.RoundRedButton;
+import prueba.cosas.RoundRedButton;
 import javax.swing.*;
 import java.awt.*;
 import prueba.cosas.TablaProductos;

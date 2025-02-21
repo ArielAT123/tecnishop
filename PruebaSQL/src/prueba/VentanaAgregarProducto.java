@@ -4,7 +4,7 @@
  */
 package prueba;
 
-import prueba.ClasesTablas.RoundRedButton;
+import prueba.cosas.RoundRedButton;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JLabel;
