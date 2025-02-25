@@ -86,7 +86,7 @@ public class ExcelGenerator {
             fileOutputStream.close();
             
             System.out.println("✅ Archivo generado correctamente en: " + archivoDestino);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

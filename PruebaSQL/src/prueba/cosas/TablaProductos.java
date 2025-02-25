@@ -14,7 +14,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
-public class TablaProductos extends JFrame {
+public class TablaProductos extends ModernFrame {
+    
     private JTable table;
     private DefaultTableModel tableModel;
     private final RoundRedButton updateButton;
@@ -25,12 +26,19 @@ public class TablaProductos extends JFrame {
     private int selectedRow;
 
     public TablaProductos(JFrame previus) {
+        super();
         setTitle("Product Table");
-        setSize(1200, 700);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Pantalla completa
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         this.previus = previus;
 
+        // Panel principal para el contenido del body
+        JPanel bodyPanel = new JPanel(new BorderLayout(10, 10));
+        bodyPanel.setBackground(new Color(245, 245, 245)); // Fondo gris claro, igual al body de ModernFrame
+        bodyPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Configurar la tabla
         tableModel = new DefaultTableModel();
         tableModel.addColumn("Codigo");
         tableModel.addColumn("Nombre");
@@ -41,9 +49,9 @@ public class TablaProductos extends JFrame {
         tableModel.addColumn("IVA");
         tableModel.addColumn("% ganancia");
 
-        // Crear la tabla con el modelo
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
+        bodyPanel.add(scrollPane, BorderLayout.CENTER); // Tabla en el centro del body
 
         // Inicializar selectedRow
         selectedRow = -1;
@@ -91,18 +99,24 @@ public class TablaProductos extends JFrame {
         });
 
         // Panel para los botones
-        JPanel buttonPanel = new JPanel();
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         buttonPanel.add(updateButton);
         buttonPanel.add(updateAllButton);
         buttonPanel.add(regresar);
         buttonPanel.add(cantidad);
 
-        // Añadir componentes al JFrame
-        add(scrollPane, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        // Añadir el panel de botones al SOUTH del bodyPanel
+        bodyPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Añadir el bodyPanel al CENTER del ModernFrame
+        add(bodyPanel, BorderLayout.CENTER);
 
         // Cargar los datos de la base de datos
         SQLConsultas.loadProductsFromDatabase(tableModel);
+
+        // Hacer visible la ventana
+        setVisible(true);
     }
 
     // Método general para actualizar una fila específica
@@ -117,8 +131,9 @@ public class TablaProductos extends JFrame {
             Double precio_venta_recomendado = Double.parseDouble(tableModel.getValueAt(row, 5).toString());
             Double impuesto = Double.parseDouble(tableModel.getValueAt(row, 6).toString());
             Double porcentaje_ganancia = Double.parseDouble(tableModel.getValueAt(row, 7).toString());
+            
 
-            SQLConsultas.updateProductInDatabase(codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia);
+            SQLConsultas.updateProductInDatabase(this, codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(TablaProductos.this, "Error: Los valores numéricos no son válidos en la fila " + (row + 1), "Error", JOptionPane.ERROR_MESSAGE);
         }

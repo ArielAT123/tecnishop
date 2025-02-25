@@ -51,6 +51,6 @@ public class ModernJFrame extends JFrame {
         // Agregar el panel principal al JFrame
         add(mainPanel);
     }
-
+    
     
 }

@@ -4,6 +4,7 @@
  */
 package prueba.cosas;
 
+import java.awt.Component;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
 import java.util.function.Consumer;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import prueba.ClasesTablas.Cliente;
@@ -98,34 +100,51 @@ public class SQLConsultas extends pruebaSQL{
         }
     }
     
-    public static void updateProductInDatabase(String codigo, String nombre, Integer cantidad, Double costo_compra, Double precio_venta_sugerido, Double precio_venta_recomendado, Double impuesto, Double porcentaje_ganancia) {
-        String query = "UPDATE producto SET nombre = ?, cantidad = ?, costo_compra = ?, precio_venta_sugerido = ?, precio_venta_recomendado = ?, impuesto = ?, porcentaje_ganancia = ? WHERE codigo = ?";
+    public static void updateProductInDatabase(Component parentComponent, String codigo, String nombre, Integer cantidad, Double costo_compra, Double precio_venta_sugerido, Double precio_venta_recomendado, Double impuesto, Double porcentaje_ganancia) {
+    String query = "UPDATE producto SET nombre = ?, cantidad = ?, costo_compra = ?, precio_venta_sugerido = ?, precio_venta_recomendado = ?, impuesto = ?, porcentaje_ganancia = ? WHERE codigo = ?";
 
-        executeTransaction(conn -> {
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                // Establecer los parámetros en la consulta
-                pstmt.setString(1, nombre);
-                pstmt.setInt(2, cantidad);
-                pstmt.setDouble(3, costo_compra);
-                pstmt.setDouble(4, precio_venta_sugerido);
-                pstmt.setDouble(5, precio_venta_recomendado);
-                pstmt.setDouble(6, impuesto);
-                pstmt.setDouble(7, porcentaje_ganancia);
-                pstmt.setString(8, codigo);
+    executeTransaction(conn -> {
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            // Establecer los parámetros en la consulta
+            pstmt.setString(1, nombre);
+            pstmt.setInt(2, cantidad);
+            pstmt.setDouble(3, costo_compra);
+            pstmt.setDouble(4, precio_venta_sugerido);
+            pstmt.setDouble(5, precio_venta_recomendado);
+            pstmt.setDouble(6, impuesto);
+            pstmt.setDouble(7, porcentaje_ganancia);
+            pstmt.setString(8, codigo);
 
-                // Ejecutar la actualización
-                int rowsAffected = pstmt.executeUpdate();
+            // Ejecutar la actualización
+            int rowsAffected = pstmt.executeUpdate();
 
-                if (rowsAffected > 0) {
-                    System.out.println("Producto actualizado correctamente. Rows afected: "+rowsAffected);
-                } else {
-                    System.out.println("No se encontró el producto con código: " + codigo);
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException("Error al ejecutar la consulta", e);
+            if (rowsAffected > 0) {
+                System.out.println("Producto actualizado correctamente. Rows affected: " + rowsAffected);
+
+                // Mostrar un mensaje de confirmación
+                JOptionPane.showMessageDialog(parentComponent,
+                    "Datos Actualizados:\nCódigo: " + codigo +
+                    "\nNombre: " + nombre +
+                    "\nCantidad: " + cantidad +
+                    "\nCosto de Compra: " + costo_compra +
+                    "\nPrecio Venta Sugerido: " + precio_venta_sugerido +
+                    "\nPrecio Venta Recomendado: " + precio_venta_recomendado +
+                    "\nImpuesto: " + impuesto +
+                    "\nPorcentaje de Ganancia: " + porcentaje_ganancia,
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                System.out.println("No se encontró el producto con código: " + codigo);
+
+                // Mostrar un mensaje de error si no se encontró el producto
+                JOptionPane.showMessageDialog(parentComponent,
+                    "No se encontró el producto con código: " + codigo,
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
-    }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al ejecutar la consulta", e);
+        }
+    });
+}
     
    public static Cliente getClienteFromDatabase(int clienteId) {
     String query = "SELECT id, CONCAT(Nombre, ' ', Apellido) AS nombre_completo, telefono, correo, CI FROM cliente WHERE id = ?";

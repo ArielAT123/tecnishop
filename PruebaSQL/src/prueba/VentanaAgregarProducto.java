@@ -22,9 +22,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JFrame;
+import prueba.cosas.ModernFrame;
 
 
-public class VentanaAgregarProducto extends javax.swing.JFrame {
+public class VentanaAgregarProducto extends ModernFrame {
 
     String nombre;
     String descripcion;
@@ -38,9 +39,10 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
 
     // Constructor que recibe la referencia al menú principal
     public VentanaAgregarProducto(MenuFrame menuFrame) {
+        super();
         this.previus = menuFrame; // Asignar la referencia
         initComponents();
-        setSize(600, 500); // Tamaño de la ventana
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null); // Centrar la ventana en la pantalla
     }
 
@@ -247,19 +249,24 @@ public class VentanaAgregarProducto extends javax.swing.JFrame {
     private void resetearCampos() {
         nombreProducto.setText("Ingrese nombre");
         nombreProducto.setForeground(Color.GRAY);
+
         descripcionProducto.setText("Ingrese descripción");
         descripcionProducto.setForeground(Color.GRAY);
-        costoCompraProducto.setText("Ingrese costo de compra");
+
+        costoCompraProducto.setText("Ingrese costo");
         costoCompraProducto.setForeground(Color.GRAY);
-        porcentajeGananciaProducto.setText("Ingrese porcentaje de ganancia");
+
+        porcentajeGananciaProducto.setText("Ingrese % ganancia");
         porcentajeGananciaProducto.setForeground(Color.GRAY);
-        impuestoProducto.setText("Ingrese impuesto");
+
+        impuestoProducto.setText("Ingrese IVA");
         impuestoProducto.setForeground(Color.GRAY);
+
         cantidadProducto.setText("Ingrese cantidad");
         cantidadProducto.setForeground(Color.GRAY);
-        codigo_producto.setText("Ingrese codigo");
+
+        codigo_producto.setText("Ingrese código");
         codigo_producto.setForeground(Color.GRAY);
-        
     }
         
     private Double validarCostoCompra() {

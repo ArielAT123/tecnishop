@@ -20,8 +20,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 import javax.swing.text.AbstractDocument;
+import prueba.cosas.ModernFrame;
 
-public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
+public class VentanaAgregarCLienteJFrame extends ModernFrame {
     protected String nombre, apellido, correo, telefono, ci;
     protected JFrame previus;
     protected javax.swing.JButton btnRegresarMenu;
@@ -39,9 +40,10 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
     protected javax.swing.JPanel jPanel1;
 
     public VentanaAgregarCLienteJFrame(JFrame menuFrame) {
+        super();
         this.previus = menuFrame;
         initComponents();
-        setSize(600, 500); // Tamaño de la ventana
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Tamaño de la ventana
         setLocationRelativeTo(null); // Centrar la ventana
     }
 
@@ -75,7 +77,7 @@ public class VentanaAgregarCLienteJFrame extends javax.swing.JFrame {
 
         // Estilo del Panel
         jPanel1.setBackground(Color.WHITE);
-        jPanel1.setBorder(new LineBorder(Color.RED, 2, true));
+        jPanel1.setBorder(new LineBorder(new Color(200, 0, 0)));
 
         // Configuración de los JTextField
         configurarCampoTexto(nombreCliente, "Ingrese nombre");
