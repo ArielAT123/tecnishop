@@ -9,6 +9,9 @@ import java.awt.*;
 public class ModernFrame extends JFrame {
 
     public ModernFrame() {
+        Image icono = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/prueba/imagenes/logo_empresa.jpeg"));
+        setIconImage(icono);
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

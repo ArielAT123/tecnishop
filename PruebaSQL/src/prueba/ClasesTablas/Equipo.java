@@ -4,7 +4,7 @@
  */
 package prueba.ClasesTablas;
 
-import prueba.pruebaSQL;
+import SQL_Clases.pruebaSQL;
 
 /**
  *

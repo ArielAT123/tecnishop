@@ -5,8 +5,8 @@
 package prueba.ClasesTablas;
 
 import java.util.ArrayList;
-import prueba.Utilitaria;
-import prueba.pruebaSQL;
+import prueba.cosas.Utilitaria;
+import SQL_Clases.pruebaSQL;
 
 /**
  *

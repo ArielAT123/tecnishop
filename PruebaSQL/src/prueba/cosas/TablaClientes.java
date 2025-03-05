@@ -8,6 +8,7 @@ package prueba.cosas;
  *
  * @author Ernesto
  */
+import SQL_Clases.SQLConsultas;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -39,9 +40,5 @@ public class TablaClientes extends JFrame {
     }
 
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new TablaClientes().setVisible(true);
-        });
-    }
+    
 }

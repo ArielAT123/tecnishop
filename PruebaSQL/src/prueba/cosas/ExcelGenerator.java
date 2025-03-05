@@ -77,7 +77,7 @@ public class ExcelGenerator {
             for(int i=0; i<problems.getProblemas().size(); i++) {
                 escribirCelda(sheet, 10+i+cambio, 8, problems.getProblemas().get(i)); 
             }
-            cambio+=27;
+            cambio+=35;
             }
             
             FileOutputStream fileOutputStream = new FileOutputStream(archivoDestino.toFile());
