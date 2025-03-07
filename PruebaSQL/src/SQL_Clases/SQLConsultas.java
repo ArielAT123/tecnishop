@@ -74,8 +74,29 @@ public class SQLConsultas extends pruebaSQL{
             }
         }
     }
-    public static void loadProductsFromDatabase(DefaultTableModel tableModel) {
+
+
+    // Nuevo método para filtrar por cualquier columna
+    public static void loadProductsFromDatabaseByColumn(DefaultTableModel tableModel, String columnName, String filterValue) {
+        String dbColumnName;
+        switch (columnName) {
+            case "Codigo": dbColumnName = "codigo"; break;
+            case "Nombre": dbColumnName = "nombre"; break;
+            case "Cantidad": dbColumnName = "cantidad"; break;
+            case "Costo de Compra": dbColumnName = "costo_compra"; break;
+            case "Precio Sugerido": dbColumnName = "precio_venta_sugerido"; break;
+            case "Precio Recomendado": dbColumnName = "precio_venta_recomendado"; break;
+            case "IVA": dbColumnName = "impuesto"; break;
+            case "% ganancia": dbColumnName = "porcentaje_ganancia"; break;
+            default: dbColumnName=""; // Columna no válida
+        }
+        
         String query = "SELECT codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia FROM producto";
+        if (!filterValue.isEmpty() || !dbColumnName.isEmpty()) {
+            query += " WHERE "+dbColumnName+" LIKE '%" + filterValue + "%'";
+        }
+
+        
 
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
@@ -119,17 +140,7 @@ public class SQLConsultas extends pruebaSQL{
             if (rowsAffected > 0) {
                 System.out.println("Producto actualizado correctamente. Rows affected: " + rowsAffected);
 
-                // Mostrar un mensaje de confirmación
-                JOptionPane.showMessageDialog(parentComponent,
-                    "Datos Actualizados:\nCódigo: " + codigo +
-                    "\nNombre: " + nombre +
-                    "\nCantidad: " + cantidad +
-                    "\nCosto de Compra: " + costo_compra +
-                    "\nPrecio Venta Sugerido: " + precio_venta_sugerido +
-                    "\nPrecio Venta Recomendado: " + precio_venta_recomendado +
-                    "\nImpuesto: " + impuesto +
-                    "\nPorcentaje de Ganancia: " + porcentaje_ganancia,
-                    "Información", JOptionPane.INFORMATION_MESSAGE);
+                
             } else {
                 System.out.println("No se encontró el producto con código: " + codigo);
 

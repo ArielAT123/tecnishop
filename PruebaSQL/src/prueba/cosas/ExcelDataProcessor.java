@@ -203,9 +203,9 @@ public class ExcelDataProcessor {
         }
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         processTxtProductos("/prueba/cosas/imagenes/productos.txt");
-    }
+    }*/
 }
 
     /*public static void main(String[] args) {
