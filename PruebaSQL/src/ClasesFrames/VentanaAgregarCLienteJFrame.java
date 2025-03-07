@@ -111,6 +111,7 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
             public void actionPerformed(ActionEvent e) {
                 guardarDatos();
                 if (!isDefault()) {
+                    
                     pruebaSQL.insertCliente(nombre, apellido, telefono, correo, ci);
                 }
                 resetearCampos();
@@ -210,6 +211,9 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
         correo = correoCliente.getText();
         telefono = telefonoCliente.getText();
         ci = CI.getText();
+        if("Ingrese correo".equals(correo)){correo="NO HAY CORREO";}
+        if("Ingrese CI".equals(ci)){correo="NO CI";}
+        
 
         JOptionPane.showMessageDialog(this,
                 "Datos Guardados:\nNombre: " + nombre + "\nApellido: " + apellido +
@@ -242,7 +246,7 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
         correoCliente.setText("Ingrese correo");
         correoCliente.setForeground(Color.GRAY);
 
-        telefonoCliente.setText("Ingrese tel");
+        telefonoCliente.setText("Ingrese tl");
         telefonoCliente.setForeground(Color.GRAY);
 
         CI.setText("Ingrese CI");

@@ -20,11 +20,16 @@ import prueba.ClasesTablas.ProblemaEquipo;
 
 public class ExcelGenerator {
     public static void generarOrdenExcel(String quienRealiza, Observacion observacion, Equipo equipo, ProblemaEquipo problems, Cliente cliente, String id_Orden) {
-        try {
-            // Construir ruta del escritorio correctamente
-            String escritorio = System.getProperty("user.home") + File.separator + "Desktop" + File.separator + "Reportes_Generados";
-            Files.createDirectories(Paths.get(escritorio));
+try {
+            // Rutas de salida
+            String escritorioExcel = System.getProperty("user.home") + File.separator + "Desktop" + File.separator + "Reportes_Generados";
+            String outputDirPdf = "C:\\Users\\ernes\\OneDrive\\Escritorio\\Reportes_PDF";
             
+            // Crear directorios si no existen
+            Files.createDirectories(Paths.get(escritorioExcel));
+            Files.createDirectories(Paths.get(outputDirPdf));
+            
+            // Generar datos del reporte
             String nombreCliente = cliente.getNombreCompleto();
             String telefono = cliente.getTelefono();  
             String cedula = cliente.getCedula();
@@ -38,44 +43,40 @@ public class ExcelGenerator {
             String fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
             
             String nuevoNombreArchivo = "REPORTE_" + nombreCliente + "_" + id_Orden + ".xlsx";
-            
             Path archivoOrigen = Paths.get("reporte.xlsx");
-            Path archivoDestino = Paths.get(escritorio, nuevoNombreArchivo);
+            Path archivoDestino = Paths.get(escritorioExcel, nuevoNombreArchivo);
             
-            // Copiar el archivo original antes de modificarlo
+            // Copiar y modificar el archivo Excel
             Files.copy(archivoOrigen, archivoDestino, StandardCopyOption.REPLACE_EXISTING);	
             FileInputStream fileInputStream = new FileInputStream(archivoDestino.toFile());
             Workbook workbook = new XSSFWorkbook(fileInputStream);
             fileInputStream.close();
 
-            Sheet sheet = workbook.getSheetAt(0); // Asegúrate de que la hoja es la correcta
+            Sheet sheet = workbook.getSheetAt(0);
             int cambio = 0;          
 
             for (int cont = 0; cont < 2; cont++) {
-                // EQUIPO
                 escribirCelda(sheet, 10 + cambio, 0, equipo.getArticulo());
                 escribirCelda(sheet, 10 + cambio, 2, equipo.getMarca());
                 escribirCelda(sheet, 10 + cambio, 4, equipo.getModelo());
                 escribirCelda(sheet, 10 + cambio, 6, equipo.getNumero_serie());
-                
-                // Escribir datos en las celdas correspondientes
-                escribirCelda(sheet, 6 + cambio, 1, nombreCliente); // B7
-                escribirCelda(sheet, 33 + cambio, 9, nombreCliente); // J34
-                escribirCelda(sheet, 7 + cambio, 1, telefono); // B8
-                escribirCelda(sheet, 6 + cambio, 6, cedula); // G7
-                escribirCelda(sheet, 7 + cambio, 6, mail); // G8
-                escribirCelda(sheet, 6 + cambio, 9, fecha); // J7
-                escribirCelda(sheet, 2 + cambio, 10, idOrden); // K3
-                escribirCelda(sheet, 18 + cambio, 4, cargador); // E19
-                escribirCelda(sheet, 18 + cambio, 6, bateria); // G19
-                escribirCelda(sheet, 18 + cambio, 8, cablePoder); // I19
-                escribirCelda(sheet, 18 + cambio, 10, cableDatos); // K19
-                escribirCelda(sheet, 20 + cambio, 4, otros); // E21
-                escribirCelda(sheet, 33 + cambio, 1, quienRealiza); // B34
+                escribirCelda(sheet, 6 + cambio, 1, nombreCliente);
+                escribirCelda(sheet, 33 + cambio, 9, nombreCliente);
+                escribirCelda(sheet, 7 + cambio, 1, telefono);
+                escribirCelda(sheet, 6 + cambio, 6, cedula);
+                escribirCelda(sheet, 7 + cambio, 6, mail);
+                escribirCelda(sheet, 6 + cambio, 9, fecha);
+                escribirCelda(sheet, 2 + cambio, 10, idOrden);
+                escribirCelda(sheet, 18 + cambio, 4, cargador);
+                escribirCelda(sheet, 18 + cambio, 6, bateria);
+                escribirCelda(sheet, 18 + cambio, 8, cablePoder);
+                escribirCelda(sheet, 18 + cambio, 10, cableDatos);
+                escribirCelda(sheet, 20 + cambio, 4, otros);
+                escribirCelda(sheet, 33 + cambio, 1, quienRealiza);
                 for (int i = 0; i < problems.getProblemas().size(); i++) {
                     escribirCelda(sheet, 10 + i + cambio, 8, problems.getProblemas().get(i)); 
                 }
-                cambio += 35;
+                cambio += 39;
             }
             
             FileOutputStream fileOutputStream = new FileOutputStream(archivoDestino.toFile());
@@ -83,19 +84,26 @@ public class ExcelGenerator {
             workbook.close();
             fileOutputStream.close();
             
-            System.out.println("✅ Archivo generado correctamente en: " + archivoDestino);
+            System.out.println("✅ Archivo Excel generado en: " + archivoDestino);
 
-            // Abrir la carpeta del escritorio donde se guardó el archivo
-            if (Desktop.isDesktopSupported()) {
-                Desktop desktop = Desktop.getDesktop();
-                File carpeta = new File(escritorio);
-                if (carpeta.exists()) {
-                    desktop.open(carpeta); // Abre la carpeta "Reportes_Generados" en el escritorio
+            // Convertir a PDF directamente usando el método estático
+            boolean conversionExitosa = XlsxToPdfConverter.convertXlsxToPdf(archivoDestino.toString(), outputDirPdf);
+            
+            if (conversionExitosa) {
+                // Abrir la carpeta de PDFs
+                if (Desktop.isDesktopSupported()) {
+                    Desktop desktop = Desktop.getDesktop();
+                    File carpetaPdf = new File(outputDirPdf);
+                    if (carpetaPdf.exists()) {
+                        desktop.open(carpetaPdf);
+                    } else {
+                        System.out.println("❌ La carpeta no existe: " + outputDirPdf);
+                    }
                 } else {
-                    System.out.println("❌ La carpeta no existe: " + escritorio);
+                    System.out.println("❌ Desktop no es soportado en este sistema.");
                 }
             } else {
-                System.out.println("❌ Desktop no es soportado en este sistema.");
+                System.out.println("❌ Falló la conversión a PDF.");
             }
 
         } catch (IOException e) {
