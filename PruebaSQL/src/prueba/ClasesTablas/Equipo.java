@@ -11,7 +11,6 @@ import SQL_Clases.pruebaSQL;
  * @author Ernesto
  */
 public class Equipo {
-    private pruebaSQL prueba; 
     private String articulo,marca, modelo,numero_serie;
     private int id_Cliente;
     private int id_equipo;
@@ -21,7 +20,14 @@ public class Equipo {
         this.modelo = modelo;
         this.numero_serie = numero_serie;
         this.id_Cliente = id_cliente;
-        id_equipo= prueba.insertEquipo(this.articulo, this.id_Cliente, this.marca,  this.modelo, this.numero_serie);
+        id_equipo= pruebaSQL.insertEquipo(this.articulo, this.id_Cliente, this.marca,  this.modelo, this.numero_serie);
+    }
+    
+    public Equipo(String articulo, String marca, String modelo, String numero_serie) {
+        this.articulo = articulo;
+        this.marca = marca;
+        this.modelo = modelo;
+        this.numero_serie = numero_serie;
     }
 
     public String getArticulo() {

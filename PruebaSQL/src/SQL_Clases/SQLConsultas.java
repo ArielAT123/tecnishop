@@ -88,15 +88,13 @@ public class SQLConsultas extends pruebaSQL{
             case "Precio Recomendado": dbColumnName = "precio_venta_recomendado"; break;
             case "IVA": dbColumnName = "impuesto"; break;
             case "% ganancia": dbColumnName = "porcentaje_ganancia"; break;
-            default: dbColumnName=""; // Columna no válida
-        }
-        
-        String query = "SELECT codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia FROM producto";
-        if (!filterValue.isEmpty() || !dbColumnName.isEmpty()) {
-            query += " WHERE "+dbColumnName+" LIKE '%" + filterValue + "%'";
+            default: dbColumnName = "";
         }
 
-        
+        String query = "SELECT id, codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia, estado FROM producto";
+        if (!filterValue.isEmpty() && !dbColumnName.isEmpty()) {
+            query += " WHERE " + dbColumnName + " LIKE '%" + filterValue + "%'";
+        }
 
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
@@ -104,6 +102,7 @@ public class SQLConsultas extends pruebaSQL{
 
             while (rs.next()) {
                 Vector<Object> row = new Vector<>();
+                row.add(false); // Columna "Seleccionar" inicializada como false
                 row.add(rs.getString("codigo"));
                 row.add(rs.getString("nombre"));
                 row.add(rs.getInt("cantidad"));
@@ -112,6 +111,7 @@ public class SQLConsultas extends pruebaSQL{
                 row.add(rs.getDouble("precio_venta_recomendado"));
                 row.add(rs.getDouble("impuesto"));
                 row.add(rs.getDouble("porcentaje_ganancia"));
+                row.add(rs.getString("estado"));
                 tableModel.addRow(row);
             }
         } catch (SQLException e) {
@@ -119,41 +119,39 @@ public class SQLConsultas extends pruebaSQL{
         }
     }
     
-    public static void updateProductInDatabase(Component parentComponent, String codigo, String nombre, Integer cantidad, Double costo_compra, Double precio_venta_sugerido, Double precio_venta_recomendado, Double impuesto, Double porcentaje_ganancia) {
-    String query = "UPDATE producto SET nombre = ?, cantidad = ?, costo_compra = ?, precio_venta_sugerido = ?, precio_venta_recomendado = ?, impuesto = ?, porcentaje_ganancia = ? WHERE codigo = ?";
+    public static void updateProductInDatabase(Component parentComponent, String codigo, String nombre, Integer cantidad, Double costoCompra, Double precioVentaSugerido, Double precioVentaRecomendado, Double impuesto, Double porcentajeGanancia) {
+        String query = "UPDATE producto SET nombre = ?, cantidad = ?, costo_compra = ?, precio_venta_sugerido = ?, precio_venta_recomendado = ?, impuesto = ?, porcentaje_ganancia = ? WHERE codigo = ?";
 
-    executeTransaction(conn -> {
-        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-            // Establecer los parámetros en la consulta
-            pstmt.setString(1, nombre);
-            pstmt.setInt(2, cantidad);
-            pstmt.setDouble(3, costo_compra);
-            pstmt.setDouble(4, precio_venta_sugerido);
-            pstmt.setDouble(5, precio_venta_recomendado);
-            pstmt.setDouble(6, impuesto);
-            pstmt.setDouble(7, porcentaje_ganancia);
-            pstmt.setString(8, codigo);
+        try (Connection conn = connect()) {
+            conn.setAutoCommit(true); // Usar autocommit para cada actualización
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                System.out.println("Ejecutando actualización para código: " + codigo + " con cantidad: " + cantidad);
+                pstmt.setString(1, nombre);
+                pstmt.setInt(2, cantidad);
+                pstmt.setDouble(3, costoCompra);
+                pstmt.setDouble(4, precioVentaSugerido);
+                pstmt.setDouble(5, precioVentaRecomendado);
+                pstmt.setDouble(6, impuesto);
+                pstmt.setDouble(7, porcentajeGanancia);
+                pstmt.setString(8, codigo);
 
-            // Ejecutar la actualización
-            int rowsAffected = pstmt.executeUpdate();
+                int rowsAffected = pstmt.executeUpdate();
+                System.out.println("Consulta ejecutada. Filas afectadas: " + rowsAffected + " para código: " + codigo);
 
-            if (rowsAffected > 0) {
-                System.out.println("Producto actualizado correctamente. Rows affected: " + rowsAffected);
-
-                
-            } else {
-                System.out.println("No se encontró el producto con código: " + codigo);
-
-                // Mostrar un mensaje de error si no se encontró el producto
-                JOptionPane.showMessageDialog(parentComponent,
-                    "No se encontró el producto con código: " + codigo,
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                if (rowsAffected > 0) {
+                    System.out.println("Producto actualizado correctamente. Rows affected: " + rowsAffected + " (Código: " + codigo + ")");
+                } else {
+                    System.out.println("No se encontró el producto con código: " + codigo);
+                    JOptionPane.showMessageDialog(parentComponent,
+                        "No se encontró el producto con código: " + codigo,
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error al ejecutar la consulta", e);
+            System.out.println("Error SQL al actualizar código " + codigo + ": " + e.getMessage());
+            JOptionPane.showMessageDialog(parentComponent, "Error al actualizar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-    });
-}
+    }
     
    public static Cliente getClienteFromDatabase(int clienteId) {
     String query = "SELECT id, CONCAT(Nombre, ' ', Apellido) AS nombre_completo, telefono, correo, CI FROM cliente WHERE id = ?";
