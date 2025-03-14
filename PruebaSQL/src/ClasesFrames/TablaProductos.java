@@ -9,7 +9,9 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import prueba.cosas.ModernFrame;
 import prueba.cosas.RoundRedButton;
@@ -27,7 +29,8 @@ public class TablaProductos extends ModernFrame {
     private JTextField filterField;
     private RoundRedButton filterButton;
     private String columnName;
-    private Set<ProductoInventario> productosSeleccionados = new HashSet<>();
+    private List<Integer> selectedRowIndices = new ArrayList<>(); // Lista dinámica de índices de filas seleccionadas
+    private Set<ProductoInventario> productosSeleccionados = new HashSet<>(); // Set para los productos a actualizar
 
     public TablaProductos(JFrame previus) {
         super();
@@ -85,46 +88,30 @@ public class TablaProductos extends ModernFrame {
             }
         });
 
-        // Actualizar productosSeleccionados cuando se marque/desmarque un checkbox
+        // Actualizar índices y cambiar color de las filas seleccionadas
         table.getModel().addTableModelListener(e -> {
             int row = e.getFirstRow();
             int column = e.getColumn();
             if (column == 0 && row >= 0) { // Solo para la columna de checkboxes y asegurarse de que la fila es válida
-                try {
-                    Boolean isSelected = (Boolean) tableModel.getValueAt(row, 0); // Obtener el valor del checkbox
-                    if (isSelected != null) {
-                        String codigo = (String) tableModel.getValueAt(row, 1);
-                        String nombre = (String) tableModel.getValueAt(row, 2);
-                        int cantidad = Integer.parseInt(tableModel.getValueAt(row, 3).toString());
-                        double costoCompra = Double.parseDouble(tableModel.getValueAt(row, 4).toString());
-                        double precioVentaSugerido = Double.parseDouble(tableModel.getValueAt(row, 5).toString());
-                        double precioVentaRecomendado = Double.parseDouble(tableModel.getValueAt(row, 6).toString());
-                        double impuesto = Double.parseDouble(tableModel.getValueAt(row, 7).toString());
-                        double porcentajeGanancia = Double.parseDouble(tableModel.getValueAt(row, 8).toString());
-                        String estado = (String) tableModel.getValueAt(row, 9);
-
-                        ProductoInventario producto = new ProductoInventario(-1, codigo, nombre, cantidad, costoCompra,
-                                precioVentaSugerido, precioVentaRecomendado, impuesto, porcentajeGanancia, estado);
-                        if (isSelected) {
-                            productosSeleccionados.add(producto);
-                            System.out.println("Producto añadido al set: " + producto);
-                        } else {
-                            productosSeleccionados.remove(producto);
-                            System.out.println("Producto removido del set: " + producto);
+                Boolean isSelected = (Boolean) tableModel.getValueAt(row, 0); // Obtener el valor del checkbox
+                if (isSelected != null) {
+                    if (isSelected) {
+                        if (!selectedRowIndices.contains(row)) {
+                            selectedRowIndices.add(row);
+                            System.out.println("Fila " + row + " añadida a los índices seleccionados.");
+                            table.repaint(); // Forzar repintado para reflejar el color de selección
                         }
-                        System.out.println("Productos seleccionados: " + productosSeleccionados);
+                    } else {
+                        selectedRowIndices.remove(Integer.valueOf(row));
+                        System.out.println("Fila " + row + " removida de los índices seleccionados.");
+                        table.repaint(); // Forzar repintado para restaurar el color original
                     }
-                } catch (NumberFormatException ex) {
-                    System.out.println("Error de formato en fila " + row + ": " + ex.getMessage());
-                    JOptionPane.showMessageDialog(TablaProductos.this, "Error: Datos inválidos en la fila " + (row + 1), "Error", JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    System.out.println("Error inesperado en fila " + row + ": " + ex.getMessage());
-                    JOptionPane.showMessageDialog(TablaProductos.this, "Error inesperado en la fila " + (row + 1), "Error", JOptionPane.ERROR_MESSAGE);
+                    System.out.println("Índices de filas seleccionadas: " + selectedRowIndices);
                 }
             }
         });
 
-        // Renderizador personalizado para cambiar el color de las filas según el estado
+        // Renderizador personalizado para cambiar el color de las filas según el estado y la selección
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -136,26 +123,29 @@ public class TablaProductos extends ModernFrame {
                     return c;
                 }
 
-                // Obtener el estado de la fila actual (columna "Estado" es la 9)
-                String estado = (String) tableModel.getValueAt(row, 9);
-
-                // Cambiar el color de fondo según el estado
-                switch (estado) {
-                    case "disponible":
-                        c.setBackground(new Color(0, 255, 0, 150));
-                        break;
-                    case "escaso":
-                        c.setBackground(new Color(255, 255, 0, 150));
-                        break;
-                    case "agotado":
-                        c.setBackground(new Color(255, 0, 0, 150));
-                        break;
-                    default:
-                        c.setBackground(table.getBackground());
-                        break;
+                // Si la fila está seleccionada dinámicamente (checkbox marcado), usar el color de selección
+                if (selectedRowIndices.contains(row)) {
+                    c.setBackground(table.getSelectionBackground());
+                } else {
+                    // Restaurar color basado en el estado
+                    String estado = (String) tableModel.getValueAt(row, 9);
+                    switch (estado) {
+                        case "disponible":
+                            c.setBackground(new Color(0, 255, 0, 150));
+                            break;
+                        case "escaso":
+                            c.setBackground(new Color(255, 255, 0, 150));
+                            break;
+                        case "agotado":
+                            c.setBackground(new Color(255, 0, 0, 150));
+                            break;
+                        default:
+                            c.setBackground(table.getBackground());
+                            break;
+                    }
                 }
 
-                // Mantener el color de selección si la fila está seleccionada
+                // Mantener el color de selección si la fila está seleccionada manualmente (clic)
                 if (isSelected) {
                     c.setBackground(table.getSelectionBackground());
                     c.setForeground(table.getSelectionForeground());
@@ -196,18 +186,26 @@ public class TablaProductos extends ModernFrame {
         // Acción para actualizar la fila seleccionada
         updateButton.addActionListener(e -> {
             if (selectedRow != -1) {
-                String codigo = (String) tableModel.getValueAt(selectedRow, 1);
-                ProductoInventario productoSeleccionado = null;
-                for (ProductoInventario p : productosSeleccionados) {
-                    if (p.getCodigo().equals(codigo)) {
-                        productoSeleccionado = p;
-                        break;
-                    }
-                }
-                if (productoSeleccionado != null) {
-                    actualizarProducto(productoSeleccionado, true);
-                } else {
-                    JOptionPane.showMessageDialog(TablaProductos.this, "El producto no está seleccionado con checkbox.", "Error", JOptionPane.ERROR_MESSAGE);
+                try {
+                    String codigo = (String) tableModel.getValueAt(selectedRow, 1);
+                    String nombre = (String) tableModel.getValueAt(selectedRow, 2);
+                    int cantidad = Integer.parseInt(tableModel.getValueAt(selectedRow, 3).toString());
+                    double costoCompra = Double.parseDouble(tableModel.getValueAt(selectedRow, 4).toString());
+                    double precioVentaSugerido = Double.parseDouble(tableModel.getValueAt(selectedRow, 5).toString());
+                    double precioVentaRecomendado = Double.parseDouble(tableModel.getValueAt(selectedRow, 6).toString());
+                    double impuesto = Double.parseDouble(tableModel.getValueAt(selectedRow, 7).toString());
+                    double porcentajeGanancia = Double.parseDouble(tableModel.getValueAt(selectedRow, 8).toString());
+                    String estado = (String) tableModel.getValueAt(selectedRow, 9);
+
+                    ProductoInventario producto = new ProductoInventario(-1, codigo, nombre, cantidad, costoCompra,
+                            precioVentaSugerido, precioVentaRecomendado, impuesto, porcentajeGanancia, estado);
+                    actualizarProducto(producto, true);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Error de formato en fila " + selectedRow + ": " + ex.getMessage());
+                    JOptionPane.showMessageDialog(TablaProductos.this, "Error: Datos inválidos en la fila " + (selectedRow + 1), "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    System.out.println("Error inesperado en fila " + selectedRow + ": " + ex.getMessage());
+                    JOptionPane.showMessageDialog(TablaProductos.this, "Error inesperado en la fila " + (selectedRow + 1), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 JOptionPane.showMessageDialog(TablaProductos.this, "Por favor, seleccione una fila para actualizar.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -219,14 +217,47 @@ public class TablaProductos extends ModernFrame {
 
         // Acción para actualizar todas las filas
         updateAllButton.addActionListener(e -> {
-            if (productosSeleccionados.isEmpty()) {
+            if (selectedRowIndices.isEmpty()) {
                 JOptionPane.showMessageDialog(TablaProductos.this, "Por favor, seleccione al menos una fila con checkbox para actualizar.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            System.out.println("Productos seleccionados antes de actualizar: " + productosSeleccionados);
+            System.out.println("Índices de filas seleccionadas antes de actualizar: " + selectedRowIndices);
+
+            // Limpiar el set antes de llenarlo
+            productosSeleccionados.clear();
+
+            // Crear productos y añadirlos al set basados en los índices seleccionados
+            for (Integer rowIndex : selectedRowIndices) {
+                try {
+                    String codigo = (String) tableModel.getValueAt(rowIndex, 1);
+                    String nombre = (String) tableModel.getValueAt(rowIndex, 2);
+                    int cantidad = Integer.parseInt(tableModel.getValueAt(rowIndex, 3).toString());
+                    double costoCompra = Double.parseDouble(tableModel.getValueAt(rowIndex, 4).toString());
+                    double precioVentaSugerido = Double.parseDouble(tableModel.getValueAt(rowIndex, 5).toString());
+                    double precioVentaRecomendado = Double.parseDouble(tableModel.getValueAt(rowIndex, 6).toString());
+                    double impuesto = Double.parseDouble(tableModel.getValueAt(rowIndex, 7).toString());
+                    double porcentajeGanancia = Double.parseDouble(tableModel.getValueAt(rowIndex, 8).toString());
+                    String estado = (String) tableModel.getValueAt(rowIndex, 9);
+
+                    ProductoInventario producto = new ProductoInventario(-1, codigo, nombre, cantidad, costoCompra,
+                            precioVentaSugerido, precioVentaRecomendado, impuesto, porcentajeGanancia, estado);
+                    productosSeleccionados.add(producto);
+                    System.out.println("Producto añadido al set desde fila " + rowIndex + ": " + producto);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Error de formato en fila " + rowIndex + ": " + ex.getMessage());
+                    JOptionPane.showMessageDialog(TablaProductos.this, "Error: Datos inválidos en la fila " + (rowIndex + 1), "Error", JOptionPane.ERROR_MESSAGE);
+                    return; // Salir si hay un error para evitar actualizaciones parciales
+                } catch (Exception ex) {
+                    System.out.println("Error inesperado en fila " + rowIndex + ": " + ex.getMessage());
+                    JOptionPane.showMessageDialog(TablaProductos.this, "Error inesperado en la fila " + (rowIndex + 1), "Error", JOptionPane.ERROR_MESSAGE);
+                    return; // Salir si hay un error para evitar actualizaciones parciales
+                }
+            }
+
+            // Actualizar todos los productos en el set
+            System.out.println("Productos seleccionados para actualizar: " + productosSeleccionados);
             boolean allSuccess = true;
-            Set<ProductoInventario> productsToUpdate = new HashSet<>(productosSeleccionados); // Copia para evitar modificaciones
-            for (ProductoInventario producto : productsToUpdate) {
+            for (ProductoInventario producto : productosSeleccionados) {
                 try {
                     System.out.println("Intentando actualizar producto: " + producto);
                     actualizarProducto(producto, false);
@@ -236,6 +267,7 @@ public class TablaProductos extends ModernFrame {
                     ex.printStackTrace();
                 }
             }
+
             // Recargar la tabla una sola vez después de todas las actualizaciones
             System.out.println("Recargando tabla después de todas las actualizaciones");
             tableModel.setRowCount(0);
@@ -244,7 +276,8 @@ public class TablaProductos extends ModernFrame {
                 allSuccess ? "Todas las filas han sido actualizadas." : "Algunas filas no se actualizaron correctamente.",
                 allSuccess ? "Éxito" : "Advertencia", 
                 allSuccess ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
-            productosSeleccionados.clear();
+            selectedRowIndices.clear(); // Limpiar los índices después de la actualización
+            productosSeleccionados.clear(); // Limpiar el set después de la actualización
         });
 
         // Panel para los botones
@@ -266,7 +299,8 @@ public class TablaProductos extends ModernFrame {
             String filterText = filterField.getText().trim();
             tableModel.setRowCount(0);
             SQLConsultas.loadProductsFromDatabaseByColumn(tableModel, columnName, filterText);
-            productosSeleccionados.clear(); // Limpiar selecciones al filtrar
+            selectedRowIndices.clear(); // Limpiar índices al filtrar
+            productosSeleccionados.clear(); // Limpiar el set al filtrar
         });
 
         table.getTableHeader().addMouseListener(new MouseAdapter() {
