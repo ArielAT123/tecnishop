@@ -8,7 +8,7 @@ package ClasesDatos;
  *
  * @author Ernesto
  */
-public class ProductoInventario {
+public class ProductoInventario implements Comparable<ProductoInventario>{
     private int id;
     private String codigo;
     private String nombre;
@@ -63,16 +63,23 @@ public class ProductoInventario {
         return "ProductoInventario{codigo=" + codigo + ", nombre=" + nombre + ", cantidad=" + cantidad + ", estado=" + estado + "}";
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProductoInventario that = (ProductoInventario) o;
-        return codigo.equals(that.codigo); // Comparar por código, que es único
-    }
-
+   
     @Override
     public int hashCode() {
         return codigo.hashCode();
+    }
+
+    
+
+    @Override
+    public int compareTo(ProductoInventario o) {
+        int comparacionCantidad = Integer.compare(this.cantidad, o.cantidad);
+
+        // Si las cantidades son iguales, comparar por precioVentaRecomendado
+        if (comparacionCantidad == 0) {
+            return Double.compare(this.precioVentaRecomendado, o.precioVentaRecomendado);
+        }
+
+        return comparacionCantidad;
     }
 }

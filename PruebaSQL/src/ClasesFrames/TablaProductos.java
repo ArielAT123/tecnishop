@@ -5,7 +5,6 @@ import SQL_Clases.SQLConsultas;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -15,10 +14,11 @@ import java.util.List;
 import java.util.Set;
 import prueba.cosas.ModernFrame;
 import prueba.cosas.RoundRedButton;
+import prueba.cosas.TablaNegocio;
 
 public class TablaProductos extends ModernFrame {
     
-    private JTable table;
+    private TablaNegocio table;
     private DefaultTableModel tableModel;
     private final RoundRedButton updateButton;
     private final RoundRedButton updateAllButton;
@@ -28,9 +28,12 @@ public class TablaProductos extends ModernFrame {
     private int selectedRow;
     private JTextField filterField;
     private RoundRedButton filterButton;
+    private RoundRedButton allcheckButton;
+    private RoundRedButton visualizarEstadoButton;
     private String columnName;
-    private List<Integer> selectedRowIndices = new ArrayList<>(); // Lista dinámica de índices de filas seleccionadas
-    private Set<ProductoInventario> productosSeleccionados = new HashSet<>(); // Set para los productos a actualizar
+    private List<Integer> selectedRowIndices = new ArrayList<>();
+    private Set<ProductoInventario> productosSeleccionados = new HashSet<>();
+    private boolean mostrarColoresEstado = false;
 
     public TablaProductos(JFrame previus) {
         super();
@@ -42,80 +45,60 @@ public class TablaProductos extends ModernFrame {
 
         // Panel principal para el contenido del body
         JPanel bodyPanel = new JPanel(new BorderLayout(10, 10));
-        bodyPanel.setBackground(new Color(245, 245, 245));
+        bodyPanel.setBackground(Color.BLACK);
         bodyPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Configurar la tabla con columna de checkboxes
+        // Configurar el modelo de la tabla
         tableModel = new DefaultTableModel() {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 0) return Boolean.class; // Primera columna para checkboxes
+                if (columnIndex == 0) return Boolean.class;
                 return super.getColumnClass(columnIndex);
             }
         };
-        tableModel.addColumn("Check"); // Columna 0: Checkbox
-        tableModel.addColumn("Codigo");       // Columna 1
-        tableModel.addColumn("Nombre");       // Columna 2
-        tableModel.addColumn("Cantidad");     // Columna 3
-        tableModel.addColumn("Costo de Compra"); // Columna 4
-        tableModel.addColumn("Precio Sugerido"); // Columna 5
-        tableModel.addColumn("Precio Recomendado"); // Columna 6
-        tableModel.addColumn("IVA");          // Columna 7
-        tableModel.addColumn("% ganancia");   // Columna 8
-        tableModel.addColumn("Estado");       // Columna 9
+        tableModel.addColumn("Check");
+        tableModel.addColumn("Código");
+        tableModel.addColumn("Nombre");
+        tableModel.addColumn("Cantidad");
+        tableModel.addColumn("Costo de Compra");
+        tableModel.addColumn("Precio Sugerido");
+        tableModel.addColumn("Precio Recomendado");
+        tableModel.addColumn("IVA");
+        tableModel.addColumn("% ganancia");
+        tableModel.addColumn("Estado");
 
-        table = new JTable(tableModel);
-        table.getTableHeader().setReorderingAllowed(false);
+        // Crear la tabla personalizada
+        table = new TablaNegocio(tableModel, selectedRowIndices);
 
-        // Renderizador y editor para la columna de checkboxes
-        TableCellRenderer checkboxRenderer = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JCheckBox checkbox = new JCheckBox();
-                checkbox.setSelected(value != null && (Boolean) value);
-                checkbox.setHorizontalAlignment(JCheckBox.CENTER);
-                return checkbox;
-            }
-        };
-        table.getColumnModel().getColumn(0).setCellRenderer(checkboxRenderer);
-
-        table.setDefaultEditor(Boolean.class, new DefaultCellEditor(new JCheckBox()) {
-            @Override
-            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-                JCheckBox checkbox = (JCheckBox) super.getTableCellEditorComponent(table, value, isSelected, row, column);
-                checkbox.setHorizontalAlignment(JCheckBox.CENTER);
-                return checkbox;
-            }
-        });
-
-        // Actualizar índices y cambiar color de las filas seleccionadas
+        // Actualizar índices al cambiar los checkboxes
         table.getModel().addTableModelListener(e -> {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            if (column == 0 && row >= 0) { // Solo para la columna de checkboxes y asegurarse de que la fila es válida
-                Boolean isSelected = (Boolean) tableModel.getValueAt(row, 0); // Obtener el valor del checkbox
+            if (column == 0 && row >= 0) {
+                Boolean isSelected = (Boolean) tableModel.getValueAt(row, 0);
                 if (isSelected != null) {
                     if (isSelected) {
                         if (!selectedRowIndices.contains(row)) {
                             selectedRowIndices.add(row);
                             System.out.println("Fila " + row + " añadida a los índices seleccionados.");
-                            table.repaint(); // Forzar repintado para reflejar el color de selección
                         }
                     } else {
                         selectedRowIndices.remove(Integer.valueOf(row));
                         System.out.println("Fila " + row + " removida de los índices seleccionados.");
-                        table.repaint(); // Forzar repintado para restaurar el color original
                     }
                     System.out.println("Índices de filas seleccionadas: " + selectedRowIndices);
+                    tableModel.fireTableDataChanged(); // Forzar actualización del renderizado
                 }
             }
         });
 
-        // Renderizador personalizado para cambiar el color de las filas según el estado y la selección
+        // Renderizador personalizado para colores
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                c.setFont(new Font("Arial", Font.PLAIN, 14));
+                ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER); // Centrar el texto (movido desde TablaNegocio)
 
                 // No aplicar color al checkbox (columna 0)
                 if (column == 0) {
@@ -123,34 +106,44 @@ public class TablaProductos extends ModernFrame {
                     return c;
                 }
 
-                // Si la fila está seleccionada dinámicamente (checkbox marcado), usar el color de selección
+                // Prioridad 1: Si la fila está seleccionada con el checkbox, usar el color de selección
                 if (selectedRowIndices.contains(row)) {
-                    c.setBackground(table.getSelectionBackground());
-                } else {
-                    // Restaurar color basado en el estado
-                    String estado = (String) tableModel.getValueAt(row, 9);
-                    switch (estado) {
-                        case "disponible":
-                            c.setBackground(new Color(0, 255, 0, 150));
-                            break;
-                        case "escaso":
-                            c.setBackground(new Color(255, 255, 0, 150));
-                            break;
-                        case "agotado":
-                            c.setBackground(new Color(255, 0, 0, 150));
-                            break;
-                        default:
-                            c.setBackground(table.getBackground());
-                            break;
-                    }
-                }
-
-                // Mantener el color de selección si la fila está seleccionada manualmente (clic)
-                if (isSelected) {
                     c.setBackground(table.getSelectionBackground());
                     c.setForeground(table.getSelectionForeground());
                 } else {
+                    // Prioridad 2: Si no está seleccionada con el checkbox, aplicar colores de estado si están activados
+                    if (mostrarColoresEstado) {
+                        String estado = (String) tableModel.getValueAt(row, 9);
+                        // Depuración: Imprimir el valor de "estado" para cada fila
+                        System.out.println("Fila " + row + ", Estado: " + estado);
+                        if (estado != null) {
+                            switch (estado.toLowerCase().trim()) { // Normalizar el valor
+                                case "disponible":
+                                    c.setBackground(new Color(0, 255, 0, 150));
+                                    break;
+                                case "escaso":
+                                    c.setBackground(new Color(255, 255, 0, 150));
+                                    break;
+                                case "agotado":
+                                    c.setBackground(new Color(255, 0, 0, 150));
+                                    break;
+                                default:
+                                    c.setBackground(table.getBackground());
+                                    break;
+                            }
+                        } else {
+                            c.setBackground(table.getBackground());
+                        }
+                    } else {
+                        c.setBackground(table.getBackground());
+                    }
                     c.setForeground(table.getForeground());
+                }
+
+                // Prioridad 3: Si la fila está seleccionada manualmente (clic), usar el color de selección
+                if (isSelected) {
+                    c.setBackground(table.getSelectionBackground());
+                    c.setForeground(table.getSelectionForeground());
                 }
 
                 return c;
@@ -163,7 +156,7 @@ public class TablaProductos extends ModernFrame {
         // Inicializar selectedRow
         selectedRow = -1;
 
-        // Actualizar selectedRow al hacer clic en la tabla (para la fila seleccionada)
+        // Actualizar selectedRow al hacer clic en la tabla
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -174,8 +167,31 @@ public class TablaProductos extends ModernFrame {
 
         // Botones
         updateButton = new RoundRedButton("Actualizar Fila Seleccionada");
+        
+
         updateAllButton = new RoundRedButton("Actualizar Todas las Filas");
+        
+
         regresar = new RoundRedButton("Regresar");
+        
+
+        allcheckButton = new RoundRedButton("Check All");
+       
+
+        filterButton = new RoundRedButton("Aplicar Filtro");
+        
+
+        visualizarEstadoButton = new RoundRedButton("Visualización de Estado");
+       
+        // Acción para el botón "Visualización de Estado"
+        visualizarEstadoButton.addActionListener(e -> {
+            System.out.println("Botón Visualización de Estado clicado");
+            mostrarColoresEstado = !mostrarColoresEstado;
+            visualizarEstadoButton.setText(mostrarColoresEstado ? "Ocultar Estado" : "Visualización de Estado");
+            tableModel.fireTableDataChanged(); // Forzar la actualización de todas las celdas
+            table.revalidate();
+            table.repaint();
+        });
 
         // Acción para regresar
         regresar.addActionListener(e -> {
@@ -214,6 +230,8 @@ public class TablaProductos extends ModernFrame {
 
         // Inicializar la etiqueta cantidad
         cantidad = new JLabel("Ninguna fila seleccionada");
+        cantidad.setForeground(Color.WHITE);
+        cantidad.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Acción para actualizar todas las filas
         updateAllButton.addActionListener(e -> {
@@ -223,10 +241,8 @@ public class TablaProductos extends ModernFrame {
             }
             System.out.println("Índices de filas seleccionadas antes de actualizar: " + selectedRowIndices);
 
-            // Limpiar el set antes de llenarlo
             productosSeleccionados.clear();
 
-            // Crear productos y añadirlos al set basados en los índices seleccionados
             for (Integer rowIndex : selectedRowIndices) {
                 try {
                     String codigo = (String) tableModel.getValueAt(rowIndex, 1);
@@ -246,15 +262,14 @@ public class TablaProductos extends ModernFrame {
                 } catch (NumberFormatException ex) {
                     System.out.println("Error de formato en fila " + rowIndex + ": " + ex.getMessage());
                     JOptionPane.showMessageDialog(TablaProductos.this, "Error: Datos inválidos en la fila " + (rowIndex + 1), "Error", JOptionPane.ERROR_MESSAGE);
-                    return; // Salir si hay un error para evitar actualizaciones parciales
+                    return;
                 } catch (Exception ex) {
                     System.out.println("Error inesperado en fila " + rowIndex + ": " + ex.getMessage());
                     JOptionPane.showMessageDialog(TablaProductos.this, "Error inesperado en la fila " + (rowIndex + 1), "Error", JOptionPane.ERROR_MESSAGE);
-                    return; // Salir si hay un error para evitar actualizaciones parciales
+                    return;
                 }
             }
 
-            // Actualizar todos los productos en el set
             System.out.println("Productos seleccionados para actualizar: " + productosSeleccionados);
             boolean allSuccess = true;
             for (ProductoInventario producto : productosSeleccionados) {
@@ -268,7 +283,6 @@ public class TablaProductos extends ModernFrame {
                 }
             }
 
-            // Recargar la tabla una sola vez después de todas las actualizaciones
             System.out.println("Recargando tabla después de todas las actualizaciones");
             tableModel.setRowCount(0);
             SQLConsultas.loadProductsFromDatabaseByColumn(tableModel, "", "");
@@ -276,31 +290,59 @@ public class TablaProductos extends ModernFrame {
                 allSuccess ? "Todas las filas han sido actualizadas." : "Algunas filas no se actualizaron correctamente.",
                 allSuccess ? "Éxito" : "Advertencia", 
                 allSuccess ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
-            selectedRowIndices.clear(); // Limpiar los índices después de la actualización
-            productosSeleccionados.clear(); // Limpiar el set después de la actualización
+            selectedRowIndices.clear();
+            productosSeleccionados.clear();
         });
 
-        // Panel para los botones
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Acción para el botón "check all"
+        allcheckButton.addActionListener(e -> {
+            int selectedCount = selectedRowIndices.size();
+            int totalRows = tableModel.getRowCount();
+
+            if (selectedCount == totalRows && totalRows > 0) {
+                for (int i = 0; i < totalRows; i++) {
+                    tableModel.setValueAt(false, i, 0);
+                }
+                selectedRowIndices.clear();
+                productosSeleccionados.clear();
+                System.out.println("Todas las filas desmarcadas.");
+            } else {
+                for (int i = 0; i < totalRows; i++) {
+                    tableModel.setValueAt(true, i, 0);
+                    if (!selectedRowIndices.contains(i)) {
+                        selectedRowIndices.add(i);
+                    }
+                }
+                System.out.println("Todas las filas marcadas. Índices: " + selectedRowIndices);
+            }
+            tableModel.fireTableDataChanged(); // Forzar actualización del renderizado
+        });
+
+        // Panel para los botones (centrado)
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        buttonPanel.setBackground(Color.BLACK);
+        buttonPanel.add(allcheckButton);
         buttonPanel.add(updateButton);
         buttonPanel.add(updateAllButton);
+        buttonPanel.add(visualizarEstadoButton);
         buttonPanel.add(regresar);
         buttonPanel.add(cantidad);
 
         // Sección de filtro por nombre
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        filterPanel.setBackground(new Color(245, 245, 245));
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        filterPanel.setBackground(Color.BLACK);
         JLabel filterLabel = new JLabel("Seleccione la columna a Filtrar:");
+        filterLabel.setForeground(Color.WHITE);
+        filterLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         filterField = new JTextField(20);
-        filterButton = new RoundRedButton("Aplicar Filtro");
+        filterField.setFont(new Font("Arial", Font.PLAIN, 14));
 
         filterButton.addActionListener(e -> {
             String filterText = filterField.getText().trim();
             tableModel.setRowCount(0);
             SQLConsultas.loadProductsFromDatabaseByColumn(tableModel, columnName, filterText);
-            selectedRowIndices.clear(); // Limpiar índices al filtrar
-            productosSeleccionados.clear(); // Limpiar el set al filtrar
+            selectedRowIndices.clear();
+            productosSeleccionados.clear();
         });
 
         table.getTableHeader().addMouseListener(new MouseAdapter() {

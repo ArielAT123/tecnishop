@@ -72,7 +72,7 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
         jLabel5 = new javax.swing.JLabel("CI:");
         CI = new javax.swing.JTextField();
         btnRegresarMenu = new RoundRedButton("Regresar al Menú");
-
+    
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Registro Cliente");
 
