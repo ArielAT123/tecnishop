@@ -33,7 +33,7 @@ public class ModernFrame extends JFrame {
         // Agregar el título
         JLabel titleLabel = new JLabel("TECNISHOP");
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 30));
         headerPanel.add(titleLabel);
 
         // Crear el panel de contenido

@@ -97,7 +97,7 @@ public class TablaProductos extends ModernFrame {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                c.setFont(new Font("Arial", Font.PLAIN, 14));
+                c.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER); // Centrar el texto (movido desde TablaNegocio)
 
                 // No aplicar color al checkbox (columna 0)

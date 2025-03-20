@@ -23,7 +23,7 @@ import javax.swing.JButton;
 public class RoundRedButton extends JButton {
     public RoundRedButton(String text) {
         super(text);
-        setFont(new Font("Arial", Font.BOLD, 16));
+        setFont(new Font("Comic Sans MS", Font.BOLD, 18));
         setBackground(new Color(200, 0, 0));
         setForeground(Color.WHITE);
         setFocusPainted(false);
