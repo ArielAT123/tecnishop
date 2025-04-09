@@ -1,15 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package prueba.cosas;
 
-/**
- *
- * @author Ernesto
- */
 import java.io.*;
 import java.nio.file.*;
+import java.awt.Desktop;
 
 public class XlsxToPdfConverter {
 
@@ -30,9 +23,9 @@ public class XlsxToPdfConverter {
         }
 
         // Ruta de LibreOffice
-        String libreOfficePath = "C:\\Program Files\\LibreOffice\\program\\soffice.exe"; // Sin comillas extra aquí
+        String libreOfficePath = "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
 
-        // Construir el comando como una lista de argumentos
+        // Construir el comando
         ProcessBuilder pb = new ProcessBuilder(
             libreOfficePath,
             "--headless",
@@ -44,14 +37,44 @@ public class XlsxToPdfConverter {
         try {
             pb.redirectErrorStream(true);
             Process process = pb.start();
+            
+            // Leer la salida del proceso
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
             }
+            
             int exitCode = process.waitFor();
             if (exitCode == 0) {
                 System.out.println("✅ Conversión a PDF exitosa. Archivo guardado en: " + outputDir);
+                
+                // =============================================
+                // NUEVO CÓDIGO PARA ABRIR EL DIRECTORIO DE SALIDA
+                // =============================================
+                try {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(outputDirectory);
+                    } else {
+                        // Métodos alternativos por sistema operativo
+                        String os = System.getProperty("os.name").toLowerCase();
+                        
+                        if (os.contains("win")) {
+                            // Windows
+                            new ProcessBuilder("explorer.exe", outputDir).start();
+                        } else if (os.contains("mac")) {
+                            // macOS
+                            new ProcessBuilder("open", outputDir).start();
+                        } else if (os.contains("nix") || os.contains("nux")) {
+                            // Linux
+                            new ProcessBuilder("xdg-open", outputDir).start();
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("⚠️ No se pudo abrir el directorio automáticamente: " + e.getMessage());
+                    System.out.println("Puedes acceder manualmente a: " + outputDir);
+                }
+                
                 return true;
             } else {
                 System.err.println("❌ Error al convertir a PDF. Código de salida: " + exitCode);

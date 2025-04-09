@@ -4,9 +4,10 @@
  */
 package SQL_Clases;
 
+import ClasesDatos.CardObjects.ProductCard;
+import ClasesDatos.ProductoInventario;
 import java.awt.Component;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +18,9 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import prueba.ClasesTablas.Cliente;
 import static SQL_Clases.pruebaSQL.connect;
+import java.util.ArrayList;
+import java.util.Collections;
+import prueba.cosas.RoundRedButton;
 
 /**
  *
@@ -77,7 +81,7 @@ public class SQLConsultas extends pruebaSQL{
 
 
     // Nuevo método para filtrar por cualquier columna
-    public static void loadProductsFromDatabaseByColumn(DefaultTableModel tableModel, String columnName, String filterValue) {
+    public static void loadProductsFromDatabaseByColumn(DefaultTableModel tableModel, String columnName, String filterValue, boolean ASC) {
         String dbColumnName;
         switch (columnName) {
             case "Codigo": dbColumnName = "codigo"; break;
@@ -90,10 +94,22 @@ public class SQLConsultas extends pruebaSQL{
             case "% ganancia": dbColumnName = "porcentaje_ganancia"; break;
             default: dbColumnName = "";
         }
-
+        boolean isNum = dbColumnName.equals("cantidad")||
+                dbColumnName.equals("costo_compra")||
+                dbColumnName.equals("precio_venta_sugerido")||
+                dbColumnName.equals("precio_venta_recomendado")||
+                dbColumnName.equals("impuesto")||
+                dbColumnName.equals("porcentaje_ganancia");
+        
         String query = "SELECT id, codigo, nombre, cantidad, costo_compra, precio_venta_sugerido, precio_venta_recomendado, impuesto, porcentaje_ganancia, estado FROM producto";
         if (!filterValue.isEmpty() && !dbColumnName.isEmpty()) {
+            if(isNum){
+            query+=" WHERE "+ dbColumnName+ "> "+ filterValue+ " ORDER BY "+dbColumnName+ " "+ (ASC ? "ASC" : "DESC");
+            
+            }
+            else{    
             query += " WHERE " + dbColumnName + " LIKE '%" + filterValue + "%'";
+            }
         }
 
         try (Connection conn = connect();
@@ -116,6 +132,64 @@ public class SQLConsultas extends pruebaSQL{
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+    public static ArrayList<ProductCard> cargarArrayProductos(int numeroPagina) {
+        // Tamaño fijo para mantener el orden: 50 elementos por página
+        ArrayList<ProductCard> arrayCard = new ArrayList<>(Collections.nCopies(50, null));
+
+        // Calculamos el OFFSET para la paginación (página 1 = 0, página 2 = 50, etc.)
+        int offset = (numeroPagina - 1) * 50;
+
+        String query = "SELECT codigo, nombre, cantidad, precio_venta_recomendado, estado, imagen_base64 " +
+                      "FROM producto LIMIT 50 OFFSET " + offset;
+
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            int indice = 0; // Empezamos desde 0 dentro del bloque de 50 elementos
+            while (rs.next()) {
+                String codigo = rs.getString("codigo");
+                String nombre = rs.getString("nombre");
+                double precioVentaRecomendado = rs.getDouble("precio_venta_recomendado");
+                String estado = rs.getString("estado");
+                String imagenBase64 = rs.getString("imagen_base64"); // Se cargará después
+
+                // Validamos campos obligatorios (si alguno es null, dejamos el espacio como null)
+                if (codigo != null && nombre != null && estado != null) {
+                    ProductoInventario producto = new ProductoInventario(
+                        codigo, nombre, precioVentaRecomendado, estado, imagenBase64);
+                    ProductCard cardProduct= new ProductCard(producto);
+                    
+                    arrayCard.set(indice, cardProduct); // Reemplazamos el null en la posición correcta
+                }
+                indice++;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return arrayCard;
+    }
+    public static void updateImageBase64(String codigoProducto, String ImagenBase64){
+        String query = "UPDATE producto SET  imagen_base64 = ? WHERE codigo = ?";
+        try (Connection conn = connect()){
+            conn.setAutoCommit(true);
+            try(PreparedStatement pstmt = conn.prepareStatement(query)){
+                pstmt.setString(1, ImagenBase64);
+                int rowsAffected = pstmt.executeUpdate();
+                System.out.println("Consulta ejecutada. Filas afectadas: " + rowsAffected + " para código: " + codigoProducto);
+                if (rowsAffected > 0) {
+                    System.out.println("Producto actualizado correctamente. Rows affected: " + rowsAffected + " (Código: " + codigoProducto + ")");
+                } else {
+                    System.out.println("No se encontró el producto con código: " + codigoProducto);
+                    
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error SQL al actualizar código " + codigoProducto + ": " + e.getMessage());
+  
         }
     }
     

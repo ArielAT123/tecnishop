@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package ClasesFrames;
 
 import SQL_Clases.pruebaSQL;
@@ -15,6 +11,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,6 +35,7 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
     protected javax.swing.JLabel jLabel3;
     protected javax.swing.JLabel jLabel4;
     protected javax.swing.JLabel jLabel5;
+    protected javax.swing.JLabel titleLabel;
     protected javax.swing.JPanel jPanel1;
 
     public VentanaAgregarCLienteJFrame(JFrame menuFrame) {
@@ -53,7 +51,7 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
                 nombre.equals("Ingrese nombre")
                         || apellido.equals("Ingrese apellido")
                         || correo.equals("Ingrese correo")
-                        || telefono.equals("Ingrese tel")
+                        || telefono.equals("Ingrese tl")
                         || ci.equals("Ingrese CI")
         );
     }
@@ -61,31 +59,51 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
     protected void initComponents() {
         jPanel1 = new javax.swing.JPanel();
         InsertButton = new RoundRedButton("Insertar");
+        btnRegresarMenu = new RoundRedButton("Regresar al Menú");
         nombreCliente = new javax.swing.JTextField();
         apellidoCliente = new javax.swing.JTextField();
         correoCliente = new javax.swing.JTextField();
         telefonoCliente = new javax.swing.JTextField();
+        CI = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel("Nombre:");
         jLabel2 = new javax.swing.JLabel("Apellido:");
         jLabel3 = new javax.swing.JLabel("Correo:");
         jLabel4 = new javax.swing.JLabel("Teléfono:");
         jLabel5 = new javax.swing.JLabel("CI:");
-        CI = new javax.swing.JTextField();
-        btnRegresarMenu = new RoundRedButton("Regresar al Menú");
-    
+        titleLabel = new javax.swing.JLabel("Registrar Nuevo Cliente");
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Registro Cliente");
 
-        // Estilo del Panel
-        jPanel1.setBackground(Color.WHITE);
-        jPanel1.setBorder(new LineBorder(new Color(200, 0, 0)));
+        // Estilo del Panel principal
+        jPanel1.setBackground(Color.BLACK); // Fondo negro
+        jPanel1.setBorder(new LineBorder(Color.LIGHT_GRAY, 2)); // Borde gris claro
+
+        // Estilo para las etiquetas y campos de texto
+        Font labelFont = new Font("Arial", Font.BOLD, 14); // Negrita para etiquetas
+        Font textFont = new Font("Arial", Font.BOLD, 14); // Negrita para campos de texto
+        Color labelColor = Color.WHITE; // Texto blanco
+        Color textBackground = new Color(50, 50, 50); // Fondo gris oscuro para campos de texto
+        Color textForeground = Color.WHITE; // Texto blanco para campos de texto
+
+        // Configuración del título
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Título más grande y en negrita
+        titleLabel.setForeground(labelColor);
+        titleLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        // Configuración de los JLabel
+        configurarEtiqueta(jLabel1, labelFont, labelColor);
+        configurarEtiqueta(jLabel2, labelFont, labelColor);
+        configurarEtiqueta(jLabel3, labelFont, labelColor);
+        configurarEtiqueta(jLabel4, labelFont, labelColor);
+        configurarEtiqueta(jLabel5, labelFont, labelColor);
 
         // Configuración de los JTextField
-        configurarCampoTexto(nombreCliente, "Ingrese nombre");
-        configurarCampoTexto(apellidoCliente, "Ingrese apellido");
-        configurarCampoTexto(correoCliente, "Ingrese correo");
-        configurarCampoTexto(telefonoCliente, "Ingrese tl");
-        configurarCampoTexto(CI, "Ingrese CI");
+        configurarCampoTexto(nombreCliente, "Ingrese nombre", textFont, textBackground, textForeground);
+        configurarCampoTexto(apellidoCliente, "Ingrese apellido", textFont, textBackground, textForeground);
+        configurarCampoTexto(correoCliente, "Ingrese correo", textFont, textBackground, textForeground);
+        configurarCampoTexto(telefonoCliente, "Ingrese tl", textFont, textBackground, textForeground);
+        configurarCampoTexto(CI, "Ingrese CI", textFont, textBackground, textForeground);
 
         // Agregar el evento de focus a los JTextField
         agregarEventoFocus(nombreCliente, "Ingrese nombre");
@@ -94,24 +112,19 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
         agregarEventoFocus(telefonoCliente, "Ingrese tl");
         agregarEventoFocus(CI, "Ingrese CI");
 
-        // Configuración de los JLabel
-        configurarEtiqueta(jLabel1);
-        configurarEtiqueta(jLabel2);
-        configurarEtiqueta(jLabel3);
-        configurarEtiqueta(jLabel4);
-        configurarEtiqueta(jLabel5);
-
         // Limitar el número de caracteres en los campos de texto
         ((AbstractDocument) telefonoCliente.getDocument()).setDocumentFilter(new LimitFilter(10));
         ((AbstractDocument) CI.getDocument()).setDocumentFilter(new LimitFilter(10));
 
-        // Evento para capturar los datos al presionar el botón
+        
+        
+
+        // Evento para capturar los datos al presionar el botón "Insertar"
         InsertButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 guardarDatos();
                 if (!isDefault()) {
-                    
                     pruebaSQL.insertCliente(nombre, apellido, telefono, correo, ci);
                 }
                 resetearCampos();
@@ -130,53 +143,72 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
         // Usar GridBagLayout para un mejor control de la disposición
         jPanel1.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Espaciado entre componentes
+        gbc.insets = new Insets(10, 10, 10, 10); // Espaciado entre componentes
         gbc.fill = GridBagConstraints.HORIZONTAL; // Ajustar componentes horizontalmente
 
-        // Agregar componentes al panel
+        // Título en la parte superior
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2; // Ocupar dos columnas
+        gbc.anchor = GridBagConstraints.CENTER; // Centrar el título
+        jPanel1.add(titleLabel, gbc);
+
+        // Campos de texto y etiquetas
+        gbc.gridwidth = 1; // Restablecer a una columna
+        gbc.anchor = GridBagConstraints.EAST; // Alinear etiquetas a la derecha
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         jPanel1.add(jLabel1, gbc);
 
         gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST; // Alinear campos a la izquierda
         jPanel1.add(nombreCliente, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
         jPanel1.add(jLabel2, gbc);
 
         gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         jPanel1.add(apellidoCliente, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
         jPanel1.add(jLabel3, gbc);
 
         gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         jPanel1.add(correoCliente, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.EAST;
         jPanel1.add(jLabel4, gbc);
 
         gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         jPanel1.add(telefonoCliente, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.EAST;
         jPanel1.add(jLabel5, gbc);
 
         gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         jPanel1.add(CI, gbc);
 
+        // Botones centrados
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         gbc.gridwidth = 2; // Ocupar dos columnas
         gbc.fill = GridBagConstraints.NONE; // No ajustar el tamaño del botón
         gbc.anchor = GridBagConstraints.CENTER; // Centrar el botón
         jPanel1.add(InsertButton, gbc);
 
-        gbc.gridy = 6;
+        gbc.gridy = 7;
         jPanel1.add(btnRegresarMenu, gbc);
 
         getContentPane().add(jPanel1);
@@ -190,7 +222,7 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 if (campo.getText().equals(placeholder)) {
                     campo.setText(""); // Borra el texto cuando hace clic
-                    campo.setForeground(Color.BLACK); // Cambia el color del texto a negro
+                    campo.setForeground(Color.WHITE); // Texto blanco
                 }
             }
 
@@ -198,7 +230,7 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (campo.getText().trim().isEmpty()) {
                     campo.setText(placeholder); // Restaura el texto si está vacío
-                    campo.setForeground(Color.GRAY); // Mantiene el color gris
+                    campo.setForeground(Color.GRAY); // Placeholder en gris
                 }
             }
         });
@@ -211,9 +243,12 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
         correo = correoCliente.getText();
         telefono = telefonoCliente.getText();
         ci = CI.getText();
-        if("Ingrese correo".equals(correo)){correo="NO HAY CORREO";}
-        if("Ingrese CI".equals(ci)){correo="NO CI";}
-        
+        if ("Ingrese correo".equals(correo)) {
+            correo = "NO HAY CORREO";
+        }
+        if ("Ingrese CI".equals(ci)) {
+            ci = "NO CI";
+        }
 
         JOptionPane.showMessageDialog(this,
                 "Datos Guardados:\nNombre: " + nombre + "\nApellido: " + apellido +
@@ -222,17 +257,18 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
     }
 
     // Métodos para configurar los JTextField y JLabel
-    protected void configurarCampoTexto(JTextField campo, String placeholder) {
+    protected void configurarCampoTexto(JTextField campo, String placeholder, Font font, Color background, Color foreground) {
         campo.setText(placeholder);
-        campo.setFont(new Font("Arial", Font.PLAIN, 14));
-        campo.setForeground(Color.GRAY);
-        campo.setBorder(new LineBorder(new Color(100, 149, 237), 2, true));
+        campo.setFont(font); // Negrita
+        campo.setForeground(Color.GRAY); // Placeholder en gris
+        campo.setBackground(background); // Fondo gris oscuro
+        campo.setBorder(new LineBorder(Color.LIGHT_GRAY, 2, true)); // Borde gris claro
         campo.setPreferredSize(new Dimension(200, 30)); // Tamaño preferido
     }
 
-    protected void configurarEtiqueta(JLabel etiqueta) {
-        etiqueta.setFont(new Font("Arial", Font.BOLD, 14));
-        etiqueta.setForeground(new Color(25, 25, 112));
+    protected void configurarEtiqueta(JLabel etiqueta, Font font, Color color) {
+        etiqueta.setFont(font); // Negrita
+        etiqueta.setForeground(color); // Texto blanco
     }
 
     // Método para restablecer los campos de texto a sus valores iniciales
@@ -253,7 +289,6 @@ public class VentanaAgregarCLienteJFrame extends ModernFrame {
         CI.setForeground(Color.GRAY);
     }
 }
-
 /*
     @SuppressWarnings("checked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

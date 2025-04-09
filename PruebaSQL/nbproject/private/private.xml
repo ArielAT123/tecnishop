@@ -3,8 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/ClasesFrames/TablaProductos.java</file>
-            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/prueba/cosas/TablaNegocio.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/prueba/cosas/ExcelDataProcessor.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/SQL_Clases/SQLConsultas.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/prueba/ClasesTablas/Cliente.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/ClasesDatos/ProductoInventario.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/ClasesDatos/CardObjects/Card.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/prueba/cosas/ExcelGenerator.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/ClasesDatos/CardObjects/MainProducts.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/prueba/cosas/XlsxToPdfConverter.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/ClasesDatos/CardObjects/ProductCard.java</file>
+            <file>file:/C:/Users/ernes/OneDrive/Documentos/NetBeansProjects/tecnishop/PruebaSQL/src/prueba/cosas/TablaClientes.java</file>
         </group>
     </open-files>
 </project-private>
